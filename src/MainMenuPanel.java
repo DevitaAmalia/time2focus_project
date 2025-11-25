@@ -20,6 +20,9 @@ public class MainMenuPanel extends JPanel {
     private JLabel lblSessionTitle;
     private JLabel lblTimer;
     private JProgressBar progressBar;
+    private int workDuration = 25;
+    private int shortBreakDuration = 5;
+    private int longBreakDuration = 15;
     
     // Tombol-tombol
     private ButtonDefault btnStart;
@@ -59,9 +62,9 @@ public class MainMenuPanel extends JPanel {
         sidebar.setLayout(new BoxLayout(sidebar, BoxLayout.Y_AXIS));
         sidebar.setBorder(new EmptyBorder(30, 20, 0, 0));
 
-        sidebar.add(createImageButton(PATH_ICON_SETTING, 50));
+        sidebar.add(createImageButton(PATH_ICON_SETTING, 40));
         sidebar.add(Box.createVerticalStrut(20));
-        sidebar.add(createImageButton(PATH_ICON_HISTORY, 50));
+        sidebar.add(createImageButton(PATH_ICON_HISTORY, 40));
         sidebar.add(Box.createVerticalStrut(20));
         
         // Tombol Music (Toggle)
@@ -86,7 +89,7 @@ public class MainMenuPanel extends JPanel {
         centerPanel.add(lblSessionTitle, gbc);
 
         // B. Indikator Fase
-        centerPanel.add(createPhaseIndicator(), setGbc(gbc, 1, 10, 20));
+        centerPanel.add(createPhaseIndicator(), setGbc(gbc, 1, 8, 14));
 
         // C. Timer Container
         timerCardLayout = new CardLayout();
@@ -105,8 +108,8 @@ public class MainMenuPanel extends JPanel {
             }
         };
         timerWrapper.setOpaque(false);
-        timerWrapper.setPreferredSize(new Dimension(500, 250));
-        timerWrapper.setBorder(new EmptyBorder(20, 20, 20, 20));
+        timerWrapper.setPreferredSize(new Dimension(360, 180));
+        timerWrapper.setBorder(new EmptyBorder(14, 14, 14, 14));
         
         // Card Timer
         JPanel cardTimer = new JPanel(new GridBagLayout());
@@ -132,7 +135,7 @@ public class MainMenuPanel extends JPanel {
 
         // E. Progress Bar
         progressBar = new JProgressBar(0, 100);
-        progressBar.setPreferredSize(new Dimension(450, 4));
+        progressBar.setPreferredSize(new Dimension(400, 4));
         progressBar.setForeground(Theme.PROGRESS_BAR_FG);
         progressBar.setBackground(Theme.PROGRESS_BAR_BG);
         progressBar.setBorderPainted(false);
@@ -179,6 +182,13 @@ public class MainMenuPanel extends JPanel {
         }
         
         this.musicPath = (String) settings.get("path_music");
+
+        Object work = settings.get("work_duration");
+        Object sb = settings.get("sb_duration");
+        Object lb = settings.get("lb_duration");
+        if (work instanceof Integer) workDuration = (Integer) work;
+        if (sb instanceof Integer) shortBreakDuration = (Integer) sb;
+        if (lb instanceof Integer) longBreakDuration = (Integer) lb;
     }
 
     // --- LOGIC MUSIK (TOGGLE) ---
@@ -186,10 +196,10 @@ public class MainMenuPanel extends JPanel {
         AudioPlayer player = AudioPlayer.getInstance();
         if (player.isMuted()) {
             player.unmute();
-            updateButtonIcon(btnMusic, PATH_ICON_MUSIC_ON, 50);
+            updateButtonIcon(btnMusic, PATH_ICON_MUSIC_ON, 40);
         } else {
             player.mute();
-            updateButtonIcon(btnMusic, PATH_ICON_MUSIC_OFF, 50);
+            updateButtonIcon(btnMusic, PATH_ICON_MUSIC_OFF, 40);
         }
     }
     
@@ -250,7 +260,7 @@ public class MainMenuPanel extends JPanel {
     
     private void startTheTimer() {
         String namaSesi = sessionInput.getText();
-        if (namaSesi.trim().isEmpty()) namaSesi = "Session";
+        if (namaSesi.trim().isEmpty()) namaSesi = "session";
         
         lblSessionTitle.setText(namaSesi);
         timerCardLayout.show(timerContainer, "TIMER");
@@ -272,7 +282,7 @@ public class MainMenuPanel extends JPanel {
         isSessionActive = false;
         isPaused = false;
         
-        lblSessionTitle.setText("Session Ended");
+        lblSessionTitle.setText("session ended");
         sessionInput.setText("");
         
         // Reset icon pause ke default
@@ -312,42 +322,57 @@ public class MainMenuPanel extends JPanel {
     }
 
     private JPanel createInputPanel() {
-        JPanel panel = new JPanel(new GridBagLayout());
+        JPanel panel = new JPanel();
         panel.setOpaque(false);
-        GridBagConstraints g = new GridBagConstraints();
-        
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setBorder(new EmptyBorder(10, 0, 10, 0));
+
         JLabel lblQ = new JLabel("what do you want to do?");
-        lblQ.setFont(Theme.FONT_BODY); 
+        lblQ.setFont(Theme.FONT_BODYBOLD); 
         lblQ.setForeground(Theme.TEXT_WHITE);
-        g.gridy = 0;
-        panel.add(lblQ, g);
+        lblQ.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panel.add(lblQ);
+
+        panel.add(Box.createVerticalStrut(18));
 
         sessionInput = new JTextField(20);
-        sessionInput.setFont(Theme.FONT_TITLE); 
+        sessionInput.setText("");
+        sessionInput.setFont(Theme.FONT_BODY.deriveFont(18f));
         sessionInput.setForeground(Theme.TEXT_WHITE);
-        sessionInput.setOpaque(false);
+        sessionInput.setOpaque(true);
+        sessionInput.setBackground(new Color(0, 0, 0, 150));
         sessionInput.setHorizontalAlignment(JTextField.CENTER);
+        sessionInput.setPreferredSize(new Dimension(300, 40));
+        sessionInput.setMaximumSize(new Dimension(300, 40));
+        sessionInput.setMinimumSize(new Dimension(300, 40));
         sessionInput.setBorder(BorderFactory.createCompoundBorder(
             BorderFactory.createMatteBorder(0, 0, 2, 0, Color.WHITE),
-            BorderFactory.createEmptyBorder(5, 5, 5, 5)
+            BorderFactory.createEmptyBorder(6, 10, 6, 10)
         ));
         sessionInput.setCaretColor(Color.WHITE);
-        
-        g.gridy = 1;
-        g.insets = new Insets(20, 0, 20, 0);
-        panel.add(sessionInput, g);
+        sessionInput.setSelectionColor(new Color(255, 255, 255, 80));
+        sessionInput.setSelectedTextColor(Color.WHITE);
+        sessionInput.setEditable(true);
+        sessionInput.setFocusable(true);
+        sessionInput.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panel.add(sessionInput);
+
+        panel.add(Box.createVerticalStrut(18));
 
         ButtonDefault btnSave = new ButtonDefault("save");
-        btnSave.setPreferredSize(new Dimension(100, 40));
+        btnSave.setPreferredSize(new Dimension(80, 35));
+        btnSave.setMaximumSize(new Dimension(80, 35));
+        btnSave.setMinimumSize(new Dimension(80, 35));
+        btnSave.setFont(Theme.FONT_BUTTON.deriveFont(18f));
         btnSave.addActionListener(e -> startTheTimer());
-        g.gridy = 2;
-        panel.add(btnSave, g);
+        btnSave.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panel.add(btnSave);
 
         return panel;
     }
     
     private JPanel createPhaseIndicator() {
-        JPanel p = new JPanel(new FlowLayout(FlowLayout.CENTER, 30, 10)) {
+        JPanel container = new JPanel(new GridLayout(1, 3, 16, 0)) {
             @Override
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g;
@@ -357,15 +382,35 @@ public class MainMenuPanel extends JPanel {
                 super.paintComponent(g);
             }
         };
-        p.setOpaque(false);
-        
-        JLabel l1 = new JLabel("25 min work");
-        JLabel l2 = new JLabel("5 min short break");
-        JLabel l3 = new JLabel("15 min long break");
-        l1.setFont(Theme.FONT_CAPTION); l2.setFont(Theme.FONT_CAPTION); l3.setFont(Theme.FONT_CAPTION);
-        l1.setForeground(Color.BLACK); l2.setForeground(Color.BLACK); l3.setForeground(Color.BLACK);
-        p.add(l1); p.add(l2); p.add(l3);
-        return p;
+        container.setOpaque(false);
+        container.setBorder(new EmptyBorder(4, 14, 4, 14));
+
+        container.add(buildPhaseItem(workDuration + " min", "work"));
+        container.add(buildPhaseItem(shortBreakDuration + " min", "short break"));
+        container.add(buildPhaseItem(longBreakDuration + " min", "long break"));
+
+        return container;
+    }
+
+    private JPanel buildPhaseItem(String top, String bottom) {
+        JPanel item = new JPanel();
+        item.setOpaque(false);
+        item.setLayout(new BoxLayout(item, BoxLayout.Y_AXIS));
+        item.setBorder(new EmptyBorder(0, 8, 0, 8));
+
+        JLabel l1 = new JLabel(top);
+        l1.setFont(Theme.FONT_BODY.deriveFont(16f));
+        l1.setForeground(Color.BLACK);
+        l1.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        JLabel l2 = new JLabel(bottom);
+        l2.setFont(Theme.FONT_CAPTION.deriveFont(14f));
+        l2.setForeground(Color.BLACK);
+        l2.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        item.add(l1);
+        item.add(l2);
+        return item;
     }
 
     // --- PAINT COMPONENT (Background) ---

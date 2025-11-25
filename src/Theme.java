@@ -40,6 +40,7 @@ public class Theme {
     public static Font FONT_BODY;         // Pakai Medium
     public static Font FONT_BUTTON;       // Pakai Medium
     public static Font FONT_CAPTION;      // Pakai Regular 
+    public static Font FONT_BODYBOLD;
 
     // --- 5. STYLES (SimpleAttributeSet) ---
     public static final SimpleAttributeSet STYLE_DEFAULT = new SimpleAttributeSet();
@@ -67,7 +68,8 @@ public class Theme {
             if (baseBold != null) {
                 FONT_TIMER_BIG = baseBold.deriveFont(100f);
                 FONT_TITLE     = baseBold.deriveFont(35f);
-                FONT_SUBHEADER = baseBold.deriveFont(30f); 
+                FONT_SUBHEADER = baseBold.deriveFont(30f);
+                FONT_BODYBOLD = baseBold.deriveFont(16f); 
             }
 
             // 2. Teks Caption, untuk isi tabel history 
