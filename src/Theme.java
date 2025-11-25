@@ -65,20 +65,20 @@ public class Theme {
             
             // 1. Timer, Judul, Subheader 
             if (baseBold != null) {
-                FONT_TIMER_BIG = baseBold.deriveFont(90f);
-                FONT_TITLE     = baseBold.deriveFont(22f);
-                FONT_SUBHEADER = baseBold.deriveFont(16f); 
+                FONT_TIMER_BIG = baseBold.deriveFont(100f);
+                FONT_TITLE     = baseBold.deriveFont(35f);
+                FONT_SUBHEADER = baseBold.deriveFont(30f); 
             }
 
             // 2. Teks Caption, untuk isi tabel history 
             if (baseRegular != null) {
-                FONT_CAPTION   = baseRegular.deriveFont(12f);
+                FONT_CAPTION   = baseRegular.deriveFont(18f);
             }
 
             // 3. Teks biasa, Button untuk tombol putih, body untuk tulisan selain title, isi history
             if (baseMedium != null) {
-                FONT_BUTTON    = baseMedium.deriveFont(16f);
-                FONT_BODY      = baseMedium.deriveFont(14f);
+                FONT_BUTTON    = baseMedium.deriveFont(30f);
+                FONT_BODY      = baseMedium.deriveFont(16f);
             }
 
             StyleConstants.setForeground(STYLE_DEFAULT, TEXT_WHITE);
