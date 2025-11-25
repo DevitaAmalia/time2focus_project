@@ -1,51 +1,115 @@
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.FontFormatException;
+import java.awt.GraphicsEnvironment;
+import java.io.File;
+import java.io.IOException;
 import javax.swing.text.SimpleAttributeSet;
-import javax.swing.text.StyleConstants;
 
 public class Theme {
     
-    // Background dan Umum
-    public static final Color BACKGROUND_TRANSLUCENT = new Color(0, 0, 0, 180); // Latar belakang semi-transparan utama.
-    public static final Color BACKGROUND_SOLID = new Color(30, 30, 30); // Latar belakang solid gelap.
-    public static final Color ACCENT_COLOR = new Color(137, 207, 240); // Biru Muda Cerah (Aksen UI).
+    // --- 1. PALET WARNA (Monokrom / Clean) ---
+    public static final Color BACKGROUND_TRANSLUCENT = new Color(0, 0, 0, 180); 
     
-    // Teks dan Input
-    public static final Color TEXT_DEFAULT_COLOR = Color.WHITE; // Warna teks default.
-    public static final Color INPUT_FIELD_BG = new Color(70, 70, 70, 150); // Background input semi-transparan.
-    public static final Color HIGHLIGHT_BG = new Color(70, 70, 70, 200); // Highlight gelap untuk tombol/fokus.
+    // Warna Teks 
+    public static final Color TEXT_WHITE = Color.WHITE; 
+    public static final Color TEXT_BLACK = Color.BLACK;
+
+    // --- 2. CONFIG TOMBOL (RoundedButton) ---
+    // Normal: Putih
+    public static final Color BTN_BG_NORMAL = Color.WHITE;
+    public static final Color BTN_FG_NORMAL = Color.BLACK;
     
-    // Warna Sesi Pomodoro
-    public static final Color COLOR_WORK = new Color(231, 76, 60); // Merah (Sesi Kerja).
-    public static final Color COLOR_BREAK = new Color(46, 204, 113); // Hijau (Sesi Istirahat).
+    // Hover: Hitam Transparan
+    public static final Color BTN_BG_HOVER = new Color(0, 0, 0, 180); 
+    public static final Color BTN_FG_HOVER = Color.WHITE;
+    public static final Color BTN_BORDER_HOVER = Color.WHITE;
 
-    // --- KONSTANTA FONT (Disajikan berdasarkan kebutuhan Pomodoro Timer) ---
-    public static final Font FONT_TITLE = new Font("Arial", Font.BOLD, 18); // Font untuk judul/header utama.
-    public static final Font FONT_TIMER_BIG = new Font("Monospaced", Font.BOLD, 100); // Font besar untuk timer.
-    public static final Font FONT_TEXT_DEFAULT = new Font("Arial", Font.PLAIN, 14); // Font teks umum.
-    public static final Font FONT_BUTTON = new Font("Arial", Font.BOLD, 16); // Font untuk tombol.
+    // --- 3. CONFIG PROGRESS BAR ---
+    public static final Color PROGRESS_BAR_FG = Color.WHITE;
+    public static final Color PROGRESS_BAR_BG = new Color(255, 255, 255, 30); // Putih pudar
 
-    // --- KONSTANTA STYLE (SimpleAttributeSet) ---
+    // --- 4. FONT HANDLING ---
+    public static final String FONT_NAME = "Space Grotesk";
+    
+    // Deklarasi Font (Nanti diisi di blok static)
+    public static Font FONT_TIMER_BIG;    // Pakai Bold
+    public static Font FONT_TITLE;        // Pakai Bold
+    public static Font FONT_SUBHEADER;    // Pakai Medium/Regular
+    public static Font FONT_BODY;         // Pakai Regular
+    public static Font FONT_BUTTON;       // Pakai Bold
+    public static Font FONT_CAPTION;      // Pakai Light (misal untuk teks kecil/history)
+
+    // --- 5. STYLES (SimpleAttributeSet) ---
     public static final SimpleAttributeSet STYLE_DEFAULT = new SimpleAttributeSet();
     public static final SimpleAttributeSet STYLE_WORK = new SimpleAttributeSet();
     public static final SimpleAttributeSet STYLE_BREAK = new SimpleAttributeSet();
-    public static final SimpleAttributeSet STYLE_HIGHLIGHT_ACCENT = new SimpleAttributeSet();
 
+    // --- 6. STATIC INITIALIZATION (Setup Font & Styles) ---
     static {
-        // STYLE_DEFAULT: Warna teks default (Putih)
-        StyleConstants.setForeground(STYLE_DEFAULT, TEXT_DEFAULT_COLOR); 
-        
-        // STYLE_WORK: Style yang menunjukkan Sesi Kerja (Merah)
-        StyleConstants.setForeground(STYLE_WORK, COLOR_WORK); 
-        
-        // STYLE_BREAK: Style yang menunjukkan Sesi Istirahat (Hijau)
-        StyleConstants.setForeground(STYLE_BREAK, COLOR_BREAK); 
-        
-        // STYLE_HIGHLIGHT_ACCENT: Style highlight menggunakan warna aksen
-        StyleConstants.setForeground(STYLE_HIGHLIGHT_ACCENT, ACCENT_COLOR);
-        StyleConstants.setBackground(STYLE_HIGHLIGHT_ACCENT, BACKGROUND_SOLID); 
+        try {
+            GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+
+            // A. LOAD BASE FONTS (Muat file mentahannya)
+            // Sesuaikan path ini dengan folder assets Anda
+            Font baseBold    = loadFont("assets/font/SpaceGrotesk-Bold.ttf");
+            Font baseRegular = loadFont("assets/font/SpaceGrotesk-Regular.ttf");
+            Font baseLight   = loadFont("assets/font/SpaceGrotesk-Light.ttf");
+            // Font baseMedium  = loadFont("assets/font/SpaceGrotesk-Medium.ttf"); // Jika butuh medium
+            
+            // Register agar sistem mengenali (opsional tapi good practice)
+            if (baseBold != null) ge.registerFont(baseBold);
+            if (baseRegular != null) ge.registerFont(baseRegular);
+            if (baseLight != null) ge.registerFont(baseLight);
+
+            // B. SETUP FONT PENGGUNAAN (Derive Size dari Base Font yang tepat)
+            
+            // 1. Timer & Judul -> Pakai baseBold
+            if (baseBold != null) {
+                FONT_TIMER_BIG = baseBold.deriveFont(90f);
+                FONT_TITLE     = baseBold.deriveFont(22f);
+                FONT_BUTTON    = baseBold.deriveFont(16f);
+            }
+
+            // 2. Teks Biasa -> Pakai baseRegular
+            if (baseRegular != null) {
+                FONT_BODY      = baseRegular.deriveFont(14f);
+                FONT_SUBHEADER = baseRegular.deriveFont(16f); // Atau pakai Medium jika ada
+            }
+
+            // 3. Teks Tipis/Kecil -> Pakai baseLight
+            if (baseLight != null) {
+                FONT_CAPTION   = baseLight.deriveFont(12f);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            // Fallback ke default font jika gagal load
+            loadFallbackFonts();
+        }
     }
     
-    // Jika Anda ingin mempertahankan metode get instance (Singleton Pattern):
+    // Helper method agar kodingan rapi (Private)
+    private static Font loadFont(String path) {
+        try {
+            File file = new File(path);
+            if (file.exists()) {
+                return Font.createFont(Font.TRUETYPE_FONT, file);
+            }
+        } catch (FontFormatException | IOException e) {
+            System.err.println("Gagal load font: " + path);
+        }
+        return null; // Return null jika gagal
+    }
+
+    private static void loadFallbackFonts() {
+        Font f = new Font("SansSerif", Font.PLAIN, 14);
+        FONT_TIMER_BIG = f.deriveFont(Font.BOLD, 90f);
+        FONT_TITLE = f.deriveFont(Font.BOLD, 22f);
+        FONT_BODY = f.deriveFont(Font.PLAIN, 14f);
+        FONT_BUTTON = f.deriveFont(Font.BOLD, 16f);
+        FONT_CAPTION = f.deriveFont(Font.PLAIN, 12f);
+    }
+    
     private Theme() {}
 }
