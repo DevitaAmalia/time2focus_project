@@ -38,7 +38,7 @@ public class Theme {
     public static Font FONT_SUBHEADER;    // Pakai Medium/Regular
     public static Font FONT_BODY;         // Pakai Regular
     public static Font FONT_BUTTON;       // Pakai Bold
-    public static Font FONT_CAPTION;      // Pakai Light (misal untuk teks kecil/history)
+    public static Font FONT_CAPTION;      // Pakai Light 
 
     // --- 5. STYLES (SimpleAttributeSet) ---
     public static final SimpleAttributeSet STYLE_DEFAULT = new SimpleAttributeSet();
@@ -55,12 +55,13 @@ public class Theme {
             Font baseBold    = loadFont("assets/font/SpaceGrotesk-Bold.ttf");
             Font baseRegular = loadFont("assets/font/SpaceGrotesk-Regular.ttf");
             Font baseLight   = loadFont("assets/font/SpaceGrotesk-Light.ttf");
-            // Font baseMedium  = loadFont("assets/font/SpaceGrotesk-Medium.ttf"); // Jika butuh medium
+            Font baseMedium  = loadFont("assets/font/SpaceGrotesk-Medium.ttf");
             
             // Register agar sistem mengenali (opsional tapi good practice)
             if (baseBold != null) ge.registerFont(baseBold);
             if (baseRegular != null) ge.registerFont(baseRegular);
             if (baseLight != null) ge.registerFont(baseLight);
+            if (baseMedium != null) ge.registerFont(baseMedium);
 
             // B. SETUP FONT PENGGUNAAN (Derive Size dari Base Font yang tepat)
             
@@ -68,18 +69,18 @@ public class Theme {
             if (baseBold != null) {
                 FONT_TIMER_BIG = baseBold.deriveFont(90f);
                 FONT_TITLE     = baseBold.deriveFont(22f);
-                FONT_BUTTON    = baseBold.deriveFont(16f);
+                FONT_SUBHEADER = baseRegular.deriveFont(16f); 
             }
 
             // 2. Teks Biasa -> Pakai baseRegular
             if (baseRegular != null) {
-                FONT_BODY      = baseRegular.deriveFont(14f);
-                FONT_SUBHEADER = baseRegular.deriveFont(16f); // Atau pakai Medium jika ada
+                FONT_CAPTION   = baseLight.deriveFont(12f);
             }
 
             // 3. Teks Tipis/Kecil -> Pakai baseLight
-            if (baseLight != null) {
-                FONT_CAPTION   = baseLight.deriveFont(12f);
+            if (baseMedium != null) {
+                FONT_BUTTON    = baseBold.deriveFont(16f);
+                FONT_BODY      = baseRegular.deriveFont(14f);
             }
 
         } catch (Exception e) {
