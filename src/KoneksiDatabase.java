@@ -5,7 +5,7 @@ class KoneksiDatabase {
 
     private String dbName;
     private String dbUrl;
-    private String usn;
+    private String username;
     private String pass;
 
     private Connection connection;
@@ -13,8 +13,8 @@ class KoneksiDatabase {
     // ================= Konstruktor =================
     public KoneksiDatabase() {
         this.dbName = "time2focus";
-        this.usn = "root";
-        this.pass = "";
+        this.username = "time2focus";
+        this.pass = "time2focus";
 
         this.dbUrl = "jdbc:mysql://localhost:3306/" + this.dbName;
 
@@ -25,7 +25,7 @@ class KoneksiDatabase {
     public Connection getConnection() {
         try {
             if (connection == null || connection.isClosed()) {
-                connection = DriverManager.getConnection(dbUrl, usn, pass);
+                connection = DriverManager.getConnection(dbUrl, username, pass);
             }
         } catch (SQLException e) {
             System.err.println("Koneksi database gagal: " + e.getMessage());
