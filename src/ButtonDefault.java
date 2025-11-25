@@ -16,13 +16,12 @@ public class ButtonDefault extends JButton {
         setContentAreaFilled(false); // Matikan background bawaan Swing
         setFocusPainted(false);      // Matikan kotak fokus saat diklik
         setBorderPainted(false);     // Matikan border bawaan
-        setOpaque(false);            // Transparan agar rounded corner terlihat
+        setOpaque(false);     // Transparan agar rounded corner terlihat
         
-        // Warna Default (Saat diam)
+        // Warna Default 
         setForeground(Theme.BTN_FG_NORMAL); 
 
-        // 2. LOGIKA HOVER (Ditanam di sini!)
-        // Setiap tombol yang dibuat dari class ini otomatis punya kemampuan mendeteksi mouse
+        // 2. LOGIKA HOVER 
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
@@ -32,7 +31,7 @@ public class ButtonDefault extends JButton {
                 // Ubah warna teks saat hover
                 setForeground(Theme.BTN_FG_HOVER); 
                 
-                repaint(); // Perintahkan Java menggambar ulang tombol dengan warna baru
+                repaint(); 
             }
 
             @Override
@@ -43,12 +42,12 @@ public class ButtonDefault extends JButton {
                 // Balikkan warna teks ke normal
                 setForeground(Theme.BTN_FG_NORMAL); 
                 
-                repaint(); // Gambar ulang lagi ke kondisi normal
+                repaint(); 
             }
         });
     }
 
-    // 3. Menggambar Ulang Tombol (Custom Painting)
+    // 3. Menggambar Ulang Tombol 
     @Override
     protected void paintComponent(Graphics g) {
         Graphics2D g2 = (Graphics2D) g.create();
