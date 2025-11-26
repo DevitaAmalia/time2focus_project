@@ -6,6 +6,7 @@ import java.util.Map;
 public class MainMenuPanel extends JPanel {
 
     // --- DEPENDENCIES ---
+    private PomodoroController controller;
     private int userId;
     private KoneksiDatabase db;
 
@@ -18,6 +19,7 @@ public class MainMenuPanel extends JPanel {
     private JPanel timerContainer;      
     private JTextField sessionInput;
     private JLabel lblSessionTitle;
+    private JLabel lblPhase;
     private JLabel lblTimer;
     private JProgressBar progressBar;
     private int workDuration = 25;
@@ -87,6 +89,13 @@ public class MainMenuPanel extends JPanel {
         gbc.gridy = 0;
         gbc.insets = new Insets(10, 0, 10, 0);
         centerPanel.add(lblSessionTitle, gbc);
+
+        lblPhase = new JLabel("-");                       // awalnya belum ada fase
+        lblPhase.setFont(Theme.FONT_BODYBOLD);            // bebas, pilih font yang kamu mau
+        lblPhase.setForeground(Theme.TEXT_WHITE);
+        gbc.gridy = 1;
+        gbc.insets = new Insets(0, 0, 10, 0);
+        centerPanel.add(lblPhase, gbc);
 
         // B. Indikator Fase
         centerPanel.add(createPhaseIndicator(), setGbc(gbc, 1, 8, 14));
@@ -214,32 +223,28 @@ public class MainMenuPanel extends JPanel {
     
     // Toggle Pause/Resume
     private void handlePauseResume() {
-        if (!isSessionActive) return; // Tombol tidak aktif jika sesi belum mulai
+        if (!isSessionActive || controller == null) return; // Tombol tidak aktif jika sesi belum mulai
 
         isPaused = !isPaused;
 
         if (isPaused) {
             System.out.println("Timer Paused");
-            // Ganti Icon jadi RESUME (karena timer sedang berhenti)
             updateButtonIcon(btnPauseResume, PATH_ICON_RESUME, 50);
-            
-            // TODO: timer.stop();
+            controller.pauseCurrentPhase();
         } else {
             System.out.println("Timer Resumed");
-            // Ganti Icon jadi PAUSE (karena timer sedang jalan)
             updateButtonIcon(btnPauseResume, PATH_ICON_PAUSE, 50);
-            
-            // TODO: timer.start();
+            controller.resumeCurrentPhase();
         }
     }
 
     // Restart Logic
     private void handleRestart() {
-        if (!isSessionActive) return;
+        if (!isSessionActive || controller == null) return;
         
         System.out.println("Timer Restarted");
         // Reset timer ke awal
-        // TODO: Reset logika timer backend
+        controller.resetCurrentPhase();
         
         // Jika restart, anggap otomatis jalan lagi (unpause)
         isPaused = false;
@@ -264,6 +269,10 @@ public class MainMenuPanel extends JPanel {
         
         lblSessionTitle.setText(namaSesi);
         timerCardLayout.show(timerContainer, "TIMER");
+
+         if (controller != null) {
+            controller.startNewSession(namaSesi);
+        }
         
         // UI Updates saat Timer Mulai
         btnStart.setText("end");
@@ -274,10 +283,13 @@ public class MainMenuPanel extends JPanel {
         updateButtonIcon(btnPauseResume, PATH_ICON_PAUSE, 50);
         
         System.out.println("Session Started: " + namaSesi);
-        // TODO: timer.start();
     }
     
     private void endSession() {
+        if (controller != null) {
+            controller.endSession();   // simpan history ke DB, matikan timer
+        }
+
         btnStart.setText("start");
         isSessionActive = false;
         isPaused = false;
@@ -287,7 +299,6 @@ public class MainMenuPanel extends JPanel {
         
         // Reset icon pause ke default
         updateButtonIcon(btnPauseResume, PATH_ICON_PAUSE, 50);
-        // TODO: timer.stop();
     }
 
     // --- UTILITIES UI ---
@@ -428,5 +439,18 @@ public class MainMenuPanel extends JPanel {
             g2d.setPaint(gp);
             g2d.fillRect(0, 0, getWidth(), getHeight());
         }
+    }
+
+    public void setController(PomodoroController controller) {
+        this.controller = controller;
+    }
+
+    // misal labelnya bernama timerLabel dan phaseLabel:
+    public void updateTimerLabel(String timeText) {
+        lblTimer.setText(timeText);
+    }
+
+    public void updatePhaseLabel(String phaseName) {
+        lblPhase.setText(phaseName);
     }
 }

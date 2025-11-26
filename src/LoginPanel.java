@@ -21,7 +21,7 @@ public class LoginPanel extends JPanel {
     
     private void loadBackground() {
         try {
-            ImageIcon icon = new ImageIcon("assets/background/midnight_forest.png");
+            ImageIcon icon = new ImageIcon("assets/background/city_scrapper.png");
             backgroundImage = icon.getImage();
         } catch (Exception e) {
             System.err.println("Background image not found, using solid color");
@@ -282,10 +282,17 @@ public class LoginPanel extends JPanel {
     }
     
     private void openMainMenu(int userId) {
+        // 1. Buat MainMenuPanel untuk user ini
+        MainMenuPanel mainMenu = new MainMenuPanel(userId, db);
+
+        // 2. Buat PomodoroController dan sambungkan dengan mainMenu
+        PomodoroController controller = new PomodoroController(mainMenu, db, userId);
+
+        // 3. Ganti isi frame menjadi mainMenu
         parentFrame.getContentPane().removeAll();
-        // Tidak mengubah ukuran frame, tetap 800x600
-        parentFrame.add(new MainMenuPanel(userId, db));
+        parentFrame.setContentPane(mainMenu);   // boleh juga parentFrame.add(mainMenu);
         parentFrame.revalidate();
         parentFrame.repaint();
     }
+
 }
