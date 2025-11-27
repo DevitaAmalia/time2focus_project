@@ -79,7 +79,7 @@ public class Theme {
 
             // 3. Teks biasa, Button untuk tombol putih, body untuk tulisan selain title, isi history
             if (baseMedium != null) {
-                FONT_BUTTON    = baseMedium.deriveFont(30f);
+                FONT_BUTTON    = baseMedium.deriveFont(27f);
                 FONT_BODY      = baseMedium.deriveFont(16f);
             }
 

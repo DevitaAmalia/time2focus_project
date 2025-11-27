@@ -3,7 +3,6 @@ import java.sql.*;
 import java.util.*;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import javax.swing.plaf.basic.BasicArrowButton;
 import javax.swing.plaf.basic.BasicComboBoxUI;
 import javax.swing.plaf.basic.BasicSpinnerUI;
 
@@ -134,7 +133,7 @@ public class SettingsPanel extends JPanel {
                 Graphics2D g2d = (Graphics2D) g;
                 g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 
-                g2d.setColor(new Color(0, 0, 0, 160));
+                g2d.setColor(new Color(0, 0, 0, 180));
                 g2d.fillRoundRect(0, 0, getWidth(), getHeight(), 30, 30);
             }
         };
@@ -148,20 +147,13 @@ public class SettingsPanel extends JPanel {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.anchor = GridBagConstraints.NORTHWEST;
         
+        // Title + logout aligned
         gbc.gridy = 0;
-        gbc.insets = new Insets(0, 0, 5, 0);
-        container.add(createHeaderPanel(), gbc);
-        
-        // Title
-        gbc.gridy = 1;
         gbc.insets = new Insets(0, 0, 2, 0);
-        JLabel titleLabel = new JLabel("hello, " + username);
-        titleLabel.setFont(Theme.FONT_TITLE.deriveFont(28f));
-        titleLabel.setForeground(Color.WHITE);
-        container.add(titleLabel, gbc);
+        container.add(createTopRow(), gbc);
         
         // Subtitle
-        gbc.gridy = 2;
+        gbc.gridy = 1;
         gbc.insets = new Insets(0, 0, 20, 0);
         JLabel subtitleLabel = new JLabel("let's set up the timer to your liking");
         subtitleLabel.setFont(Theme.FONT_BODY.deriveFont(14f));
@@ -169,27 +161,27 @@ public class SettingsPanel extends JPanel {
         container.add(subtitleLabel, gbc);
         
         // Session section
-        gbc.gridy = 3;
+        gbc.gridy = 2;
         gbc.insets = new Insets(0, 0, 15, 0);
         container.add(createSessionSection(), gbc);
         
         // Long break every section
-        gbc.gridy = 4;
+        gbc.gridy = 3;
         gbc.insets = new Insets(0, 0, 15, 0);
         container.add(createCycleSection(), gbc);
         
         // Theme section
-        gbc.gridy = 5;
+        gbc.gridy = 4;
         gbc.insets = new Insets(0, 0, 12, 0);
         container.add(createThemeSection(), gbc);
         
         // Sound section
-        gbc.gridy = 6;
+        gbc.gridy = 5;
         gbc.insets = new Insets(0, 0, 20, 0);
         container.add(createSoundSection(), gbc);
         
         // Save button
-        gbc.gridy = 7;
+        gbc.gridy = 6;
         gbc.insets = new Insets(0, 0, 0, 0);
         gbc.anchor = GridBagConstraints.CENTER;
         container.add(createSaveButton(), gbc);
@@ -197,15 +189,20 @@ public class SettingsPanel extends JPanel {
         return container;
     }
     
-    private JPanel createHeaderPanel() {
-        JPanel header = new JPanel(new BorderLayout());
-        header.setOpaque(false);
-        
+    private JPanel createTopRow() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setOpaque(false);
+
+        JLabel titleLabel = new JLabel("hello, " + username);
+        titleLabel.setFont(Theme.FONT_TITLE.deriveFont(28f));
+        titleLabel.setForeground(Color.WHITE);
+        panel.add(titleLabel, BorderLayout.WEST);
+
         btnLogout = createImageButton("assets/button/LogoutButton.png", 40);
         btnLogout.addActionListener(e -> handleLogout());
-        header.add(btnLogout, BorderLayout.EAST);
-        
-        return header;
+        panel.add(btnLogout, BorderLayout.EAST);
+
+        return panel;
     }
     
     private JButton createImageButton(String path, int size) {
@@ -314,35 +311,46 @@ public class SettingsPanel extends JPanel {
     private void styleTransparentSpinner(JSpinner spinner) {
         spinner.setUI(new BasicSpinnerUI() {
             protected Component createNextButton() {
-                JButton button = (JButton) super.createNextButton();
+                JButton button = new JButton();
+                button.setPreferredSize(new Dimension(0, 0));
+                button.setMinimumSize(new Dimension(0, 0));
+                button.setMaximumSize(new Dimension(0, 0));
                 button.setOpaque(false);
                 button.setContentAreaFilled(false);
-                button.setBorderPainted(false);
-                button.setForeground(Color.WHITE);
+                button.setBorder(null);
+                button.setFocusable(false);
                 return button;
             }
             
             protected Component createPreviousButton() {
-                JButton button = (JButton) super.createPreviousButton();
+                JButton button = new JButton();
+                button.setPreferredSize(new Dimension(0, 0));
+                button.setMinimumSize(new Dimension(0, 0));
+                button.setMaximumSize(new Dimension(0, 0));
                 button.setOpaque(false);
                 button.setContentAreaFilled(false);
-                button.setBorderPainted(false);
-                button.setForeground(Color.WHITE);
+                button.setBorder(null);
+                button.setFocusable(false);
                 return button;
             }
         });
         
         JComponent editor = spinner.getEditor();
         if (editor instanceof JSpinner.DefaultEditor) {
+            editor.setOpaque(false);
             JTextField textField = ((JSpinner.DefaultEditor) editor).getTextField();
             textField.setHorizontalAlignment(JTextField.CENTER);
             textField.setForeground(Color.WHITE);
             textField.setBackground(new Color(0, 0, 0, 0));
+            textField.setOpaque(false);
             textField.setBorder(null);
             textField.setCaretColor(Color.WHITE);
+            textField.setSelectionColor(new Color(255, 255, 255, 80));
+            textField.setDisabledTextColor(Color.WHITE);
         }
         
         spinner.setOpaque(false);
+        spinner.setBackground(new Color(0, 0, 0, 0));
         spinner.setBorder(null);
     }
     
@@ -355,48 +363,10 @@ public class SettingsPanel extends JPanel {
         label.setForeground(Color.WHITE);
         panel.add(label);
         
-        // Cycle spinner with custom styling
-        SpinnerNumberModel model = new SpinnerNumberModel(4, 1, 10, 1);
-        cycleSpinner = new JSpinner(model);
+        cycleSpinner = new JSpinner(new SpinnerNumberModel(4, 1, 10, 1));
         cycleSpinner.setPreferredSize(new Dimension(55, 30));
         cycleSpinner.setFont(Theme.FONT_BODY.deriveFont(14f));
-        
-        // Style dengan transparent arrows
-        cycleSpinner.setUI(new BasicSpinnerUI() {
-            protected Component createNextButton() {
-                JButton button = (JButton) super.createNextButton();
-                button.setOpaque(false);
-                button.setContentAreaFilled(false);
-                button.setBorderPainted(false);
-                button.setForeground(Color.WHITE);
-                return button;
-            }
-            
-            protected Component createPreviousButton() {
-                JButton button = (JButton) super.createPreviousButton();
-                button.setOpaque(false);
-                button.setContentAreaFilled(false);
-                button.setBorderPainted(false);
-                button.setForeground(Color.WHITE);
-                return button;
-            }
-        });
-        
-        // Style the spinner
-        JComponent editor = cycleSpinner.getEditor();
-        if (editor instanceof JSpinner.DefaultEditor) {
-            JTextField textField = ((JSpinner.DefaultEditor) editor).getTextField();
-            textField.setHorizontalAlignment(JTextField.CENTER);
-            textField.setForeground(Color.WHITE);
-            textField.setBackground(new Color(0, 0, 0, 0));
-            textField.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(255, 255, 255, 80), 1),
-                BorderFactory.createEmptyBorder(3, 8, 3, 8)
-            ));
-            textField.setCaretColor(Color.WHITE);
-        }
-        
-        cycleSpinner.setOpaque(false);
+        styleTransparentSpinner(cycleSpinner);
         panel.add(cycleSpinner);
         
         JLabel worksLabel = new JLabel("works");
@@ -411,7 +381,7 @@ public class SettingsPanel extends JPanel {
         JPanel panel = new JPanel(new BorderLayout(0, 8));
         panel.setOpaque(false);
         
-        JLabel label = new JLabel("theme");
+        JLabel label = new JLabel("background");
         label.setFont(Theme.FONT_BODY.deriveFont(Font.BOLD, 16f));
         label.setForeground(Color.WHITE);
         panel.add(label, BorderLayout.NORTH);
@@ -427,7 +397,7 @@ public class SettingsPanel extends JPanel {
         JPanel panel = new JPanel(new BorderLayout(0, 8));
         panel.setOpaque(false);
         
-        JLabel label = new JLabel("sound");
+        JLabel label = new JLabel("music");
         label.setFont(Theme.FONT_BODY.deriveFont(Font.BOLD, 16f));
         label.setForeground(Color.WHITE);
         panel.add(label, BorderLayout.NORTH);
@@ -445,21 +415,24 @@ public class SettingsPanel extends JPanel {
             public void updateUI() {
                 super.updateUI();
                 setOpaque(false);
+                setBackground(new Color(0, 0, 0, 0));
             }
             
             @Override
             protected void paintComponent(Graphics g) {
-                Graphics2D g2d = (Graphics2D) g;
+                Graphics2D g2d = (Graphics2D) g.create();
                 g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 
                 // Background
-                g2d.setColor(new Color(0, 0, 0, 0)); // Transparent
+                g2d.setColor(Theme.BACKGROUND_TRANSLUCENT);
                 g2d.fillRoundRect(0, 0, getWidth(), getHeight(), 12, 12);
-                
-                // Border
+                super.paintComponent(g);
+
+                // Border overlay
                 g2d.setColor(new Color(255, 255, 255, 80));
                 g2d.setStroke(new BasicStroke(1.5f));
                 g2d.drawRoundRect(1, 1, getWidth()-2, getHeight()-2, 12, 12);
+                g2d.dispose();
             }
         };
         
@@ -500,6 +473,7 @@ public class SettingsPanel extends JPanel {
         combo.setBorder(BorderFactory.createEmptyBorder(5, 12, 5, 12));
         combo.setCursor(new Cursor(Cursor.HAND_CURSOR));
         combo.setOpaque(false);
+        combo.setBackground(Theme.BACKGROUND_TRANSLUCENT);
         
         // Custom renderer
         combo.setRenderer(new DefaultListCellRenderer() {
@@ -511,13 +485,9 @@ public class SettingsPanel extends JPanel {
                 label.setBorder(BorderFactory.createEmptyBorder(8, 12, 8, 12));
                 label.setFont(Theme.FONT_BODY.deriveFont(14f));
                 
-                if (isSelected) {
-                    label.setBackground(new Color(50, 60, 80));
-                    label.setForeground(Color.WHITE);
-                } else {
-                    label.setBackground(new Color(25, 35, 55));
-                    label.setForeground(Color.WHITE);
-                }
+                Color bgColor = isSelected ? Theme.BACKGROUND_TRANSLUCENT : Theme.BACKGROUND_TRANSLUCENT;
+                label.setBackground(bgColor);
+                label.setForeground(Color.WHITE);
                 
                 return label;
             }

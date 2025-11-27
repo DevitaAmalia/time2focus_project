@@ -22,7 +22,6 @@ public class MainMenuPanel extends JPanel {
     private JLabel lblPhase;
     private JLabel lblTimer;
     private JLabel lblCounter;
-    private JProgressBar progressBar;
     private int workDuration = 25;
     private int shortBreakDuration = 5;
     private int longBreakDuration = 15;
@@ -66,7 +65,9 @@ public class MainMenuPanel extends JPanel {
         sidebar.setLayout(new BoxLayout(sidebar, BoxLayout.Y_AXIS));
         sidebar.setBorder(new EmptyBorder(30, 20, 0, 0));
 
-        sidebar.add(createImageButton(PATH_ICON_SETTING, 40));
+        JButton btnSetting = createImageButton(PATH_ICON_SETTING, 40);
+        btnSetting.addActionListener(e -> openSettingsPanel());
+        sidebar.add(btnSetting);
         sidebar.add(Box.createVerticalStrut(20));
         JButton btnHistory = createImageButton(PATH_ICON_HISTORY, 40);
         btnHistory.addActionListener(e -> openHistoryPanel());
@@ -144,15 +145,7 @@ public class MainMenuPanel extends JPanel {
         lblCounter.setForeground(Theme.TEXT_WHITE);
         centerPanel.add(lblCounter, setGbc(gbc, 3, 15, 5));
 
-        // E. Progress Bar
-        progressBar = new JProgressBar(0, 100);
-        progressBar.setPreferredSize(new Dimension(400, 4));
-        progressBar.setForeground(Theme.PROGRESS_BAR_FG);
-        progressBar.setBackground(Theme.PROGRESS_BAR_BG);
-        progressBar.setBorderPainted(false);
-        centerPanel.add(progressBar, setGbc(gbc, 4, 0, 0));
-
-        // F. Kontrol Tombol (Restart, Start, Pause/Resume)
+        // E. Kontrol Tombol (Restart, Start, Pause/Resume)
         JPanel controlPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 0));
         controlPanel.setOpaque(false);
 
@@ -175,7 +168,7 @@ public class MainMenuPanel extends JPanel {
         controlPanel.add(btnStart);
         controlPanel.add(btnPauseResume);
         
-        centerPanel.add(controlPanel, setGbc(gbc, 5, 25, 0));
+        centerPanel.add(controlPanel, setGbc(gbc, 4, 25, 0));
 
         add(centerPanel, BorderLayout.CENTER);
         
@@ -227,6 +220,16 @@ public class MainMenuPanel extends JPanel {
         HistoryPanel historyPanel = new HistoryPanel(userId, db);
         parentFrame.getContentPane().removeAll();
         parentFrame.setContentPane(historyPanel);
+        parentFrame.revalidate();
+        parentFrame.repaint();
+    }
+
+    private void openSettingsPanel() {
+        if (parentFrame == null) return;
+
+        SettingsPanel settingsPanel = new SettingsPanel(userId, db, parentFrame);
+        parentFrame.getContentPane().removeAll();
+        parentFrame.setContentPane(settingsPanel);
         parentFrame.revalidate();
         parentFrame.repaint();
     }
