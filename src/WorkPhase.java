@@ -6,7 +6,7 @@ public class WorkPhase extends PomodoroPhase {
 
     @Override
     public String getPhaseName() {
-        return "Work";
+        return "work";
     }
 
     @Override
