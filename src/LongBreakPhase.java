@@ -11,6 +11,6 @@ public class LongBreakPhase extends PomodoroPhase {
 
     @Override
     public void onPhaseFinished(PomodoroController controller) {
+        controller.handleLongBreakPhaseFinished(this);
     }
 }
-

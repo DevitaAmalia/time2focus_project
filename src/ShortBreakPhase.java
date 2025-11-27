@@ -11,6 +11,6 @@ public class ShortBreakPhase extends PomodoroPhase {
 
     @Override
     public void onPhaseFinished(PomodoroController controller) {
+        controller.handleShortBreakPhaseFinished(this);
     }
 }
-

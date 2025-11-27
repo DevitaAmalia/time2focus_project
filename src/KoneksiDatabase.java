@@ -13,8 +13,8 @@ class KoneksiDatabase {
     // ================= Konstruktor =================
     public KoneksiDatabase() {
         this.dbName = "time2focus";
-        this.username = "time2focus";
-        this.pass = "time2focus";
+        this.username = "root";
+        this.pass = "";
 
         this.dbUrl = "jdbc:mysql://localhost:3306/" + this.dbName;
 

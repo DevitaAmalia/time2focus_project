@@ -22,6 +22,7 @@ public class PomodoroController {
     private boolean sessionActive;      // apakah sesi pomodoro (1 nama sesi) sedang berjalan
     private String sessionName;         // nama sesi (diisi user di popup awal)
     private int cycleCount;             // 1 cycle = Work + Short Break
+    private int workCompletedCount;     // total fase Work yang selesai dalam sesi ini
 
     // Akumulasi waktu (detik) untuk history
     private int totalWorkSeconds;
@@ -40,9 +41,11 @@ public class PomodoroController {
         this.sessionActive = false;
         this.timerThreadRunning = false;
         this.cycleCount = 0;
+        this.workCompletedCount = 0;
 
         // Inisialisasi tampilan awal
         updateViewPhaseAndTime(null);
+        view.updateWorkCounter(workCompletedCount);
     }
 
     // ================== Load setting dari DB ==================
@@ -83,9 +86,11 @@ public class PomodoroController {
         this.sessionName = sessionName.trim();
         this.sessionActive = true;
         this.cycleCount = 0;
+        this.workCompletedCount = 0;
         this.totalWorkSeconds = 0;
         this.totalShortSeconds = 0;
         this.totalLongSeconds = 0;
+        view.updateWorkCounter(workCompletedCount);
 
         // Mulai dari Work phase
         switchToNewPhase(new WorkPhase(workDurationSec));
@@ -210,6 +215,18 @@ public class PomodoroController {
         updateViewPhaseAndTime(currentPhase);
     }
 
+    private void startPhase(PomodoroPhase phase) {
+        switchToNewPhase(phase);
+        view.setPauseState(false);
+        phase.start();
+    }
+
+    private void preparePausedPhase(PomodoroPhase phase) {
+        switchToNewPhase(phase);
+        phase.pause();
+        view.setPauseState(true);
+    }
+
     /** Update label fase & timer di panel. Sesuaikan dengan method yang ada di MainMenuPanel-mu. */
     private void updateViewPhaseAndTime(PomodoroPhase phase) {
         if (phase == null) {
@@ -254,23 +271,21 @@ public class PomodoroController {
 
         // cycle++ sesuai permintaanmu
         cycleCount++;
+        workCompletedCount++;
+        view.updateWorkCounter(workCompletedCount);
 
         int result = JOptionPane.showConfirmDialog(
             view,
-            "Work phase selesai.\nLanjut ke Short Break?",
+            "Work phase ended, continue to short break phase?",
             "Phase Selesai",
             JOptionPane.YES_NO_OPTION,
             JOptionPane.QUESTION_MESSAGE
         );
 
         if (result == JOptionPane.YES_OPTION) {
-            // lanjut ke Short Break
-            ShortBreakPhase next = new ShortBreakPhase(shortBreakDurationSec);
-            switchToNewPhase(next);
-            next.start();
+            startPhase(new ShortBreakPhase(shortBreakDurationSec));
         } else {
-            // end session
-            endSession();
+            preparePausedPhase(new ShortBreakPhase(shortBreakDurationSec));
         }
     }
 
@@ -283,35 +298,31 @@ public class PomodoroController {
         if (cycleCount < 4) {
             int result = JOptionPane.showConfirmDialog(
                 view,
-                "Short Break selesai.\nLanjut ke Work berikutnya?",
+                "Short break ended, continue to next work phase?",
                 "Phase Selesai",
                 JOptionPane.YES_NO_OPTION,
                 JOptionPane.QUESTION_MESSAGE
             );
 
             if (result == JOptionPane.YES_OPTION) {
-                WorkPhase next = new WorkPhase(workDurationSec);
-                switchToNewPhase(next);
-                next.start();
+                startPhase(new WorkPhase(workDurationSec));
             } else {
-                endSession();
+                preparePausedPhase(new WorkPhase(workDurationSec));
             }
         } else {
             // cycle == 4 → Long Break
             int result = JOptionPane.showConfirmDialog(
                 view,
-                "Kamu telah menyelesaikan 4 cycle.\nLanjut ke Long Break?",
+                "Short break ended, continue to long break phase?",
                 "Phase Selesai",
                 JOptionPane.YES_NO_OPTION,
                 JOptionPane.QUESTION_MESSAGE
             );
 
             if (result == JOptionPane.YES_OPTION) {
-                LongBreakPhase next = new LongBreakPhase(longBreakDurationSec);
-                switchToNewPhase(next);
-                next.start();
+                startPhase(new LongBreakPhase(longBreakDurationSec));
             } else {
-                endSession();
+                preparePausedPhase(new LongBreakPhase(longBreakDurationSec));
             }
         }
     }
@@ -327,18 +338,16 @@ public class PomodoroController {
 
         int result = JOptionPane.showConfirmDialog(
             view,
-            "Long Break selesai.\nApakah ingin lanjut ke Work lagi?",
+            "Long break ended, continue to work phase?",
             "Phase Selesai",
             JOptionPane.YES_NO_OPTION,
             JOptionPane.QUESTION_MESSAGE
         );
 
         if (result == JOptionPane.YES_OPTION) {
-            WorkPhase next = new WorkPhase(workDurationSec);
-            switchToNewPhase(next);
-            next.start();
+            startPhase(new WorkPhase(workDurationSec));
         } else {
-            endSession();
+            preparePausedPhase(new WorkPhase(workDurationSec));
         }
     }
 

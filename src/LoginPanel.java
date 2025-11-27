@@ -283,7 +283,7 @@ public class LoginPanel extends JPanel {
     
     private void openMainMenu(int userId) {
         // 1. Buat MainMenuPanel untuk user ini
-        MainMenuPanel mainMenu = new MainMenuPanel(userId, db);
+        MainMenuPanel mainMenu = new MainMenuPanel(userId, db, parentFrame);
 
         // 2. Buat PomodoroController dan sambungkan dengan mainMenu
         PomodoroController controller = new PomodoroController(mainMenu, db, userId);

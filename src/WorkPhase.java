@@ -11,5 +11,6 @@ public class WorkPhase extends PomodoroPhase {
 
     @Override
     public void onPhaseFinished(PomodoroController controller) {
+        controller.handleWorkPhaseFinished(this);
     }
 }
