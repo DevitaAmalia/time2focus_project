@@ -37,7 +37,7 @@ public class MainMenuPanel extends JPanel {
     private boolean isPaused = false; // State untuk melacak pause
 
     // --- PATH ASSETS ---
-    // Sidebar & Music
+    // Sidebar 
     private final String PATH_ICON_SETTING = "assets/button/SettingButton.png";
     private final String PATH_ICON_HISTORY = "assets/button/HistoryButton.png";
     private final String PATH_ICON_MUSIC_ON = "assets/button/SongButton.png";

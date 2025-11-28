@@ -99,30 +99,45 @@ public class SettingsPanel extends JPanel {
     }
     
     private void initComponents() {
-        setLayout(null); 
+        setLayout(new BorderLayout());
         
-        // Back button (outside panel, top-left)
-        btnBack = createImageButton("assets/button/BackButton.png", 50);
-        btnBack.setBounds(30, 30, 50, 50);
-        btnBack.addActionListener(e -> handleBack());
-        add(btnBack);
+        // Sidebar kiri (mirip main menu) untuk BackButton
+        JPanel sidebar = createSidebar();
+        add(sidebar, BorderLayout.WEST);
         
         // Create centered container panel
         JPanel containerPanel = createContainerPanel();
+
+        // Ukuran tetap untuk panel konten di tengah
+        Dimension containerSize = new Dimension(540, 500);
+        containerPanel.setPreferredSize(containerSize);
+        containerPanel.setMinimumSize(containerSize);
+        containerPanel.setMaximumSize(containerSize);
+
+        // Bungkus dengan BoxLayout supaya ukuran preferensi container tidak ikut mengecil
+        JPanel centerWrapper = new JPanel();
+        centerWrapper.setOpaque(false);
+        centerWrapper.setLayout(new BoxLayout(centerWrapper, BoxLayout.Y_AXIS));
+        // Turunkan sedikit kontainer agar tampak lebih centering vertikal
+        centerWrapper.setBorder(new EmptyBorder(30, 0, 0, 0));
+        containerPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        centerWrapper.add(containerPanel);
+
+        add(centerWrapper, BorderLayout.CENTER);
+    }
+    
+    private JPanel createSidebar() {
+        JPanel sidebar = new JPanel();
+        sidebar.setOpaque(false);
+        sidebar.setLayout(new BoxLayout(sidebar, BoxLayout.Y_AXIS));
+        sidebar.setBorder(new EmptyBorder(30, 20, 0, 0));
         
-        // Center the container
-        int panelWidth = 540;
-        int panelHeight = 600;
+        btnBack = createImageButton("assets/button/BackButton.png", 40);
+        btnBack.addActionListener(e -> handleBack());
+        btnBack.setAlignmentX(Component.LEFT_ALIGNMENT);
+        sidebar.add(btnBack);
         
-        addComponentListener(new java.awt.event.ComponentAdapter() {
-            public void componentResized(java.awt.event.ComponentEvent evt) {
-                int x = (getWidth() - panelWidth) / 2;
-                int y = (getHeight() - panelHeight) / 2;
-                containerPanel.setBounds(x, y, panelWidth, panelHeight);
-            }
-        });
-        
-        add(containerPanel);
+        return sidebar;
     }
     
     private JPanel createContainerPanel() {
@@ -135,12 +150,16 @@ public class SettingsPanel extends JPanel {
                 
                 g2d.setColor(new Color(0, 0, 0, 180));
                 g2d.fillRoundRect(0, 0, getWidth(), getHeight(), 30, 30);
+
+                // Garis border putih tipis di tepi container
+                g2d.setColor(Color.WHITE);
+                g2d.setStroke(new BasicStroke(2f));
+                g2d.drawRoundRect(1, 1, getWidth() - 2, getHeight() - 2, 30, 30);
             }
         };
         container.setOpaque(false);
         container.setLayout(new GridBagLayout());
-        container.setSize(540, 600);
-        container.setBorder(new EmptyBorder(30, 40, 30, 40));
+        container.setBorder(new EmptyBorder(10, 4, 10, 4));
         
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0;
@@ -149,7 +168,7 @@ public class SettingsPanel extends JPanel {
         
         // Title + logout aligned
         gbc.gridy = 0;
-        gbc.insets = new Insets(0, 0, 2, 0);
+        gbc.insets = new Insets(0, 0, 0, 0);
         container.add(createTopRow(), gbc);
         
         // Subtitle
@@ -162,12 +181,12 @@ public class SettingsPanel extends JPanel {
         
         // Session section
         gbc.gridy = 2;
-        gbc.insets = new Insets(0, 0, 15, 0);
+        gbc.insets = new Insets(0, 0, 0, 0);
         container.add(createSessionSection(), gbc);
         
         // Long break every section
         gbc.gridy = 3;
-        gbc.insets = new Insets(0, 0, 15, 0);
+        gbc.insets = new Insets(0, 0, 0, 0);
         container.add(createCycleSection(), gbc);
         
         // Theme section
@@ -415,7 +434,7 @@ public class SettingsPanel extends JPanel {
             public void updateUI() {
                 super.updateUI();
                 setOpaque(false);
-                setBackground(new Color(0, 0, 0, 0));
+                setBackground(Theme.BACKGROUND_TRANSLUCENT);
             }
             
             @Override
@@ -447,7 +466,7 @@ public class SettingsPanel extends JPanel {
                         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                         
                         // Transparent background
-                        g2.setColor(new Color(0, 0, 0, 0));
+                        g2.setColor(Theme.BACKGROUND_TRANSLUCENT);
                         g2.fillRect(0, 0, getWidth(), getHeight());
                         
                         // Draw white arrow
@@ -464,6 +483,19 @@ public class SettingsPanel extends JPanel {
                 button.setBorderPainted(false);
                 button.setFocusPainted(false);
                 return button;
+            }
+
+            @Override
+            public void paintCurrentValueBackground(Graphics g, Rectangle bounds, boolean hasFocus) {
+                // Pakai background kustom agar tidak berubah biru saat fokus
+                g.setColor(Theme.BACKGROUND_TRANSLUCENT);
+                g.fillRoundRect(bounds.x, bounds.y, bounds.width, bounds.height, 12, 12);
+            }
+
+            @Override
+            public void paintCurrentValue(Graphics g, Rectangle bounds, boolean hasFocus) {
+                // Hilangkan highlight biru bawaan
+                super.paintCurrentValue(g, bounds, false);
             }
         });
         
@@ -485,9 +517,13 @@ public class SettingsPanel extends JPanel {
                 label.setBorder(BorderFactory.createEmptyBorder(8, 12, 8, 12));
                 label.setFont(Theme.FONT_BODY.deriveFont(14f));
                 
-                Color bgColor = isSelected ? Theme.BACKGROUND_TRANSLUCENT : Theme.BACKGROUND_TRANSLUCENT;
-                label.setBackground(bgColor);
+                Color base = new Color(255, 255, 255, 25);
+                Color selected = new Color(255, 255, 255, 60);
+                label.setBackground(isSelected ? selected : base);
                 label.setForeground(Color.WHITE);
+                list.setBackground(new Color(0, 0, 0, 200));
+                list.setSelectionBackground(selected);
+                list.setSelectionForeground(Color.WHITE);
                 
                 return label;
             }
