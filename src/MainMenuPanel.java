@@ -2,6 +2,8 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.util.Map;
+import javax.swing.text.AbstractDocument;
+import javax.swing.text.DocumentFilter;
 
 public class MainMenuPanel extends JPanel {
 
@@ -302,6 +304,7 @@ public class MainMenuPanel extends JPanel {
         txtSession.setSelectedTextColor(Color.WHITE);
         txtSession.setMaximumSize(new Dimension(400, 46));
         txtSession.setAlignmentX(Component.CENTER_ALIGNMENT);
+        ((AbstractDocument) txtSession.getDocument()).setDocumentFilter(new MaxLengthDocumentFilter(20));
         container.add(txtSession);
         container.add(Box.createVerticalStrut(28));
 
@@ -371,12 +374,14 @@ public class MainMenuPanel extends JPanel {
     }
 
     private void startTheTimer(String namaSesi) {
-        if (namaSesi.trim().isEmpty()) namaSesi = "session";
+        String safeName = namaSesi == null ? "" : namaSesi.trim();
+        if (safeName.isEmpty()) safeName = "session";
+        if (safeName.length() > 20) safeName = safeName.substring(0, 20);
         
-        lblSessionTitle.setText(namaSesi);
+        lblSessionTitle.setText(safeName);
 
          if (controller != null) {
-            controller.startNewSession(namaSesi);
+            controller.startNewSession(safeName);
         }
         
         // UI Updates saat Timer Mulai
@@ -515,5 +520,28 @@ public class MainMenuPanel extends JPanel {
 
     public void updateWorkCounter(int count) {
         lblCounter.setText("total work(s) finished: " + count);
+    }
+
+    /** Simple document filter to limit text length for session input. */
+    private static class MaxLengthDocumentFilter extends DocumentFilter {
+        private final int max;
+        MaxLengthDocumentFilter(int max) {
+            this.max = max;
+        }
+        @Override
+        public void insertString(FilterBypass fb, int offset, String string, javax.swing.text.AttributeSet attr) throws javax.swing.text.BadLocationException {
+            if (string == null) return;
+            if (fb.getDocument().getLength() + string.length() <= max) {
+                super.insertString(fb, offset, string, attr);
+            }
+        }
+        @Override
+        public void replace(FilterBypass fb, int offset, int length, String text, javax.swing.text.AttributeSet attrs) throws javax.swing.text.BadLocationException {
+            if (text == null) return;
+            int newLength = fb.getDocument().getLength() - length + text.length();
+            if (newLength <= max) {
+                super.replace(fb, offset, length, text, attrs);
+            }
+        }
     }
 }

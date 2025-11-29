@@ -25,6 +25,15 @@ public class HistoryPanel extends JPanel {
     // --- ASSETS ---
     private final String PATH_ICON_BACK = "assets/button/BackButton.png";
 
+    private String formatMinutes(Object value) {
+        if (value == null) return "0";
+        try {
+            return String.valueOf(Integer.parseInt(value.toString()));
+        } catch (NumberFormatException e) {
+            return "0";
+        }
+    }
+
     public HistoryPanel(int userId, KoneksiDatabase db, JFrame parentFrame) {
         this.userId = userId;
         this.db = db;
@@ -104,9 +113,12 @@ public class HistoryPanel extends JPanel {
         // ScrollPane Transparan
         JScrollPane scrollPane = new JScrollPane(historyTable);
         scrollPane.setOpaque(false);
-        scrollPane.getViewport().setOpaque(false);
+        scrollPane.setBackground(Theme.BACKGROUND_TRANSLUCENT);
+        scrollPane.getViewport().setOpaque(true);
         scrollPane.setBorder(null);
-        scrollPane.getViewport().setBackground(new Color(0,0,0,0));
+        scrollPane.getViewport().setBackground(Theme.BACKGROUND_TRANSLUCENT);
+        scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+        scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         
         // Masukkan Tabel ke Bagian TENGAH (CENTER) dari Container Hitam
         tableContainer.add(scrollPane, BorderLayout.CENTER);
@@ -152,22 +164,23 @@ public class HistoryPanel extends JPanel {
         historyTable = new JTable(tableModel);
         
         // 1. Styling Dasar Tabel
-        historyTable.setOpaque(false);
-        historyTable.setBackground(new Color(0,0,0,0)); // Transparan total
+        historyTable.setOpaque(true);
+        historyTable.setBackground(Theme.BACKGROUND_TRANSLUCENT); // Transparan total
         historyTable.setForeground(Theme.TEXT_WHITE);
         historyTable.setFont(Theme.FONT_BODY.deriveFont(14f));
         historyTable.setRowHeight(65); 
         historyTable.setShowGrid(false); 
         historyTable.setIntercellSpacing(new Dimension(0, 0));
+        historyTable.setFillsViewportHeight(true);
         
         // Selection Style
         historyTable.setSelectionBackground(new Color(255, 255, 255, 30));
         historyTable.setSelectionForeground(Theme.TEXT_WHITE);
         
-        // 2. Styling Header (KUNCI AGAR TIDAK PUTIH)
+        // 2. Styling Header 
         JTableHeader header = historyTable.getTableHeader();
-        header.setOpaque(false); // Matikan opaque
-        header.setBackground(new Color(0,0,0,0)); // Warna background transparan
+        header.setOpaque(true); 
+        header.setBackground(Theme.BACKGROUND_TRANSLUCENT); // Samakan dengan table
         header.setForeground(Theme.TEXT_WHITE);
         header.setFont(Theme.FONT_BUTTON.deriveFont(Font.BOLD, 14f));
         header.setPreferredSize(new Dimension(0, 60));
@@ -179,7 +192,10 @@ public class HistoryPanel extends JPanel {
         historyTable.setDefaultRenderer(Object.class, new TransparentCellRenderer());
         
         // Lebar Kolom
-        historyTable.getColumnModel().getColumn(0).setPreferredWidth(300); 
+        historyTable.getColumnModel().getColumn(0).setPreferredWidth(300);
+        historyTable.getColumnModel().getColumn(1).setPreferredWidth(140);
+        historyTable.getColumnModel().getColumn(2).setPreferredWidth(140);
+        historyTable.getColumnModel().getColumn(3).setPreferredWidth(140);
     }
 
     // --- LOAD DATA ---
@@ -208,23 +224,21 @@ public class HistoryPanel extends JPanel {
         
         for (Object[] row : dataList) {
             String sessionName = (String) row[0];
-            int work = (int) row[1];
-            int sb = (int) row[2];
-            int lb = (int) row[3];
+            String work = formatMinutes(row[1]);
+            String sb = formatMinutes(row[2]);
+            String lb = formatMinutes(row[3]);
             Timestamp date = (Timestamp) row[4];
-            
+
             String dateStr = (date != null) ? dateFormat.format(date) : "-";
-            String formattedSession = "<html><div style='padding-left:10px;'>" + 
+            String formattedSession = "<html><div style='padding-left:10px;'>" +
                                       "<b style='font-size:14px'>" + sessionName + "</b><br>" +
                                       "<span style='color:#cccccc; font-size:11px'>" + dateStr + "</span>" +
                                       "</div></html>";
-            
+
             tableModel.addRow(new Object[]{formattedSession, work, sb, lb});
         }
     }
 
-    // --- RENDERERS ---
-    
     // Renderer Header Transparan
     class TransparentHeaderRenderer extends DefaultTableCellRenderer {
         @Override
@@ -232,8 +246,8 @@ public class HistoryPanel extends JPanel {
             // Gunakan JLabel biasa, jangan super.getTableCell... karena sering membawa style default L&F
             JLabel l = new JLabel();
             l.setText(value.toString());
-            l.setOpaque(false); // PENTING
-            l.setBackground(new Color(0,0,0,0));
+            l.setOpaque(true);
+            l.setBackground(Theme.BACKGROUND_TRANSLUCENT);
             l.setForeground(Theme.TEXT_WHITE);
             l.setFont(Theme.FONT_BUTTON.deriveFont(Font.BOLD, 14f));
             
