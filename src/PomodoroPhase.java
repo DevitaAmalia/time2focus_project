@@ -48,10 +48,6 @@ public abstract class PomodoroPhase {
         this.elapsedSeconds = 0;
     }
 
-    /**
-     * Dipanggil setiap 1 detik oleh controller.
-     * Controller cukup panggil tick(), tidak perlu mengurangi waktu manual.
-     */
     public void tick() {
         if (!running || finished) {
             return;

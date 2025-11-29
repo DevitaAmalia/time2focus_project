@@ -217,7 +217,7 @@ public class MainMenuPanel extends JPanel {
     private void openHistoryPanel() {
         if (parentFrame == null) return;
 
-        HistoryPanel historyPanel = new HistoryPanel(userId, db);
+        HistoryPanel historyPanel = new HistoryPanel(userId, db, parentFrame);
         parentFrame.getContentPane().removeAll();
         parentFrame.setContentPane(historyPanel);
         parentFrame.revalidate();

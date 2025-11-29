@@ -20,7 +20,7 @@ public class PomodoroController {
     private boolean phaseCompletionHandled;
 
     private boolean sessionActive;      // apakah sesi pomodoro (1 nama sesi) sedang berjalan
-    private String sessionName;         // nama sesi (diisi user di popup awal)
+    private String sessionName;         // nama sesi
     private int cycleCount;             // 1 cycle = Work + Short Break
     private int workCompletedCount;     // total fase Work yang selesai dalam sesi ini
 

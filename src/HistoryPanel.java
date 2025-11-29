@@ -1,219 +1,279 @@
-import java.awt.*;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
-import java.util.List;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.table.*;
+import java.awt.*;
+import java.sql.*;
+import java.text.SimpleDateFormat;
+import java.util.List;
+import java.util.Map;
 
 public class HistoryPanel extends JPanel {
 
-    // --- DEPENDENSI ---
-    private final int userId;
-    private final KoneksiDatabase db;
-    
+    // --- DEPENDENCIES ---
+    private int userId;
+    private KoneksiDatabase db;
+    private JFrame parentFrame;
+
+    // --- DATA ---
+    private Image backgroundImage;
+    private String username = "User"; 
+
     // --- KOMPONEN UI ---
-    private JButton btnMusic; // Tambahkan tombol music untuk sidebar
-    private Image backgroundImage; // Tambahkan Background Image (dari DB)
+    private JTable historyTable;
+    private DefaultTableModel tableModel;
 
-    private final String PATH_ICON_SETTING = "assets/button/SettingButton.png";
-    private final String PATH_ICON_HISTORY = "assets/button/HistoryButton.png";
-    private final String PATH_ICON_MUSIC_ON = "assets/button/SongButton.png";
-    private final String PATH_ICON_MUSIC_OFF = "assets/button/MuteButton.png";
+    // --- ASSETS ---
+    private final String PATH_ICON_BACK = "assets/button/BackButton.png";
 
-    // --- FORMATTER ---
-    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm");
-
-    // ================== KONSTRUKTOR ==================
-    public HistoryPanel(int userId, KoneksiDatabase db) {
+    public HistoryPanel(int userId, KoneksiDatabase db, JFrame parentFrame) {
         this.userId = userId;
         this.db = db;
-        
-        loadUserData();
+        this.parentFrame = parentFrame;
 
         setLayout(new BorderLayout());
-        setOpaque(false);
         
-        // 1. SETUP SIDEBAR (KIRI) 
+        // 1. Load Data
+        loadUserData();
+
+        // 2. SETUP SIDEBAR (Tombol Back)
         JPanel sidebar = new JPanel();
         sidebar.setOpaque(false);
         sidebar.setLayout(new BoxLayout(sidebar, BoxLayout.Y_AXIS));
         sidebar.setBorder(new EmptyBorder(30, 20, 0, 0));
 
-        // Placeholder Button Default
-        sidebar.add(createImageButton(PATH_ICON_SETTING, 40));
-        sidebar.add(Box.createVerticalStrut(20));
-        sidebar.add(createImageButton(PATH_ICON_HISTORY, 40)); 
-        sidebar.add(Box.createVerticalStrut(20));
-        
-        btnMusic = createImageButton(PATH_ICON_MUSIC_ON, 40); // Default ON
-        btnMusic.addActionListener(e -> toggleMusic());
-        sidebar.add(btnMusic);
+        JButton btnBack = createImageButton(PATH_ICON_BACK, 40);
+        btnBack.addActionListener(e -> goBackToMainMenu());
+        sidebar.add(btnBack);
 
         add(sidebar, BorderLayout.WEST);
 
-        // 2. SETUP CENTER CONTENT (TENGAH) - Menggunakan GridBagLayout
+        // 3. SETUP CENTER CONTENT
         JPanel centerPanel = new JPanel(new GridBagLayout());
         centerPanel.setOpaque(false);
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.insets = new Insets(0, 50, 0, 50);
-
-        // A. Judul
-        JLabel titleLabel = new JLabel("SESSION HISTORY");
-        titleLabel.setFont(Theme.FONT_TITLE.deriveFont(35f)); 
-        titleLabel.setForeground(Theme.TEXT_WHITE);
-        titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
         gbc.gridy = 0;
-        gbc.insets = new Insets(10, 0, 20, 0);
-        centerPanel.add(titleLabel, gbc);
-
-        // B. Muat dan Tampilkan Riwayat
-        JScrollPane scrollPane = createHistoryList();
-        gbc.gridy = 1;
-        gbc.weighty = 1.0; // Agar scrollpane mengambil sisa ruang vertikal
+        gbc.weightx = 1.0;
+        gbc.weighty = 1.0;
         gbc.fill = GridBagConstraints.BOTH;
-        gbc.insets = new Insets(0, 0, 0, 0); // Reset Insets untuk ScrollPane
-        centerPanel.add(scrollPane, gbc);
+
+        // --- CONTAINER HITAM TRANSPARAN (Rounded) ---
+        JPanel tableContainer = new JPanel(new BorderLayout()) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g;
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(Theme.BACKGROUND_TRANSLUCENT); // Hitam Transparan
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 40, 40);
+                
+                // Garis tepi tipis (opsional)
+                g2.setColor(new Color(255, 255, 255, 30));
+                g2.drawRoundRect(0, 0, getWidth()-1, getHeight()-1, 40, 40);
+                
+                super.paintComponent(g);
+            }
+        };
+        tableContainer.setOpaque(false);
+        // Padding di dalam kotak hitam: Top, Left, Bottom, Right
+        tableContainer.setBorder(new EmptyBorder(30, 30, 30, 30)); 
+        tableContainer.setPreferredSize(new Dimension(850, 500));
+
+        // --- A. HEADER TEXT (Di dalam container) ---
+        JPanel headerPanel = new JPanel(new GridLayout(2, 1));
+        headerPanel.setOpaque(false);
+        // Beri jarak antara teks header dengan tabel di bawahnya
+        headerPanel.setBorder(new EmptyBorder(0, 0, 20, 0)); 
         
-        add(centerPanel, BorderLayout.CENTER);
+        JLabel lblHello = new JLabel("hello, " + username);
+        lblHello.setFont(Theme.FONT_TITLE.deriveFont(28f)); 
+        lblHello.setForeground(Theme.TEXT_WHITE);
+        
+        JLabel lblSub = new JLabel("let’s look to what you had done");
+        lblSub.setFont(Theme.FONT_BODY.deriveFont(16f));
+        lblSub.setForeground(new Color(220, 220, 220)); 
+        
+        headerPanel.add(lblHello);
+        headerPanel.add(lblSub);
+        
+        // Masukkan Header ke Bagian ATAS (NORTH) dari Container Hitam
+        tableContainer.add(headerPanel, BorderLayout.NORTH);
+
+        // --- B. CUSTOM TABLE (Di dalam container) ---
+        createCustomTable();
+        
+        // ScrollPane Transparan
+        JScrollPane scrollPane = new JScrollPane(historyTable);
+        scrollPane.setOpaque(false);
+        scrollPane.getViewport().setOpaque(false);
+        scrollPane.setBorder(null);
+        scrollPane.getViewport().setBackground(new Color(0,0,0,0));
+        
+        // Masukkan Tabel ke Bagian TENGAH (CENTER) dari Container Hitam
+        tableContainer.add(scrollPane, BorderLayout.CENTER);
+
+        centerPanel.add(tableContainer, gbc);
+
+        // Wrapper agar container tidak mepet layar kanan/bawah
+        JPanel wrapper = new JPanel(new BorderLayout());
+        wrapper.setOpaque(false);
+        wrapper.setBorder(new EmptyBorder(20, 20, 40, 40)); 
+        wrapper.add(centerPanel, BorderLayout.CENTER);
+
+        add(wrapper, BorderLayout.CENTER);
+        
+        // 4. Populate Data
+        loadHistoryData();
     }
-    
-    // --- LOAD DATA DARI DB ---
+
+    // --- NAVIGASI ---
+    private void goBackToMainMenu() {
+        MainMenuPanel mainMenu = new MainMenuPanel(userId, db, parentFrame);
+        PomodoroController controller = new PomodoroController(mainMenu, db, userId);
+        
+        parentFrame.getContentPane().removeAll();
+        parentFrame.setContentPane(mainMenu);
+        parentFrame.revalidate();
+        parentFrame.repaint();
+    }
+
+    // --- SETUP TABLE ---
+    private void createCustomTable() {
+        String[] columns = {"session", "<html><center>work<br>(minutes)</center></html>", 
+                            "<html><center>short break<br>(minutes)</center></html>", 
+                            "<html><center>long break<br>(minutes)</center></html>"};
+        
+        tableModel = new DefaultTableModel(columns, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false; 
+            }
+        };
+
+        historyTable = new JTable(tableModel);
+        
+        // 1. Styling Dasar Tabel
+        historyTable.setOpaque(false);
+        historyTable.setBackground(new Color(0,0,0,0)); // Transparan total
+        historyTable.setForeground(Theme.TEXT_WHITE);
+        historyTable.setFont(Theme.FONT_BODY.deriveFont(14f));
+        historyTable.setRowHeight(65); 
+        historyTable.setShowGrid(false); 
+        historyTable.setIntercellSpacing(new Dimension(0, 0));
+        
+        // Selection Style
+        historyTable.setSelectionBackground(new Color(255, 255, 255, 30));
+        historyTable.setSelectionForeground(Theme.TEXT_WHITE);
+        
+        // 2. Styling Header (KUNCI AGAR TIDAK PUTIH)
+        JTableHeader header = historyTable.getTableHeader();
+        header.setOpaque(false); // Matikan opaque
+        header.setBackground(new Color(0,0,0,0)); // Warna background transparan
+        header.setForeground(Theme.TEXT_WHITE);
+        header.setFont(Theme.FONT_BUTTON.deriveFont(Font.BOLD, 14f));
+        header.setPreferredSize(new Dimension(0, 60));
+        
+        // Renderer Header (Memaksa transparan saat digambar)
+        header.setDefaultRenderer(new TransparentHeaderRenderer());
+        
+        // Renderer Isi Tabel
+        historyTable.setDefaultRenderer(Object.class, new TransparentCellRenderer());
+        
+        // Lebar Kolom
+        historyTable.getColumnModel().getColumn(0).setPreferredWidth(300); 
+    }
+
+    // --- LOAD DATA ---
     private void loadUserData() {
         Map<String, Object> settings = db.getUserSettings(userId);
-        
         String bgPath = (String) settings.get("path_bg");
         if (bgPath != null) {
             this.backgroundImage = new ImageIcon(bgPath).getImage();
         }
-    }
-    
-    // --- LOGIC MUSIK (TOGGLE) ---
-    private void toggleMusic() {
-        boolean isMuted = btnMusic.getIcon().toString().contains("MuteButton");
-        if (isMuted) {
-             updateButtonIcon(btnMusic, PATH_ICON_MUSIC_ON, 40);
-        } else {
-             updateButtonIcon(btnMusic, PATH_ICON_MUSIC_OFF, 40);
-        }
-    }
 
-    // ================== MUAT DATA & BUAT LIST ==================
-
-    private JScrollPane createHistoryList() {
-        // Kontainer untuk menampung setiap item riwayat
-        JPanel historyContainer = new JPanel();
-        historyContainer.setLayout(new BoxLayout(historyContainer, BoxLayout.Y_AXIS));
-        historyContainer.setOpaque(false); 
-
-        List<Object[]> historyData = db.getSessionHistory(userId);
-        
-        if (historyData.isEmpty()) {
-            JLabel emptyLabel = new JLabel("belum ada riwayat sesi yang tersimpan.");
-            emptyLabel.setFont(Theme.FONT_BODY);
-            emptyLabel.setForeground(Theme.TEXT_WHITE);
-            historyContainer.add(Box.createVerticalGlue()); 
-            historyContainer.add(emptyLabel);
-            emptyLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-            historyContainer.add(Box.createVerticalGlue()); 
-            historyContainer.setBorder(new EmptyBorder(100, 0, 100, 0));
-        } else {
-            // Tambahkan setiap sesi ke kontainer
-            for (Object[] session : historyData) {
-                JPanel itemPanel = createHistoryItem(session);
-                historyContainer.add(itemPanel);
-                historyContainer.add(Box.createVerticalStrut(10)); 
+        try (Connection conn = db.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement("SELECT username FROM users WHERE id_user = ?")) {
+            pstmt.setInt(1, userId);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                this.username = rs.getString("username");
             }
+        } catch (SQLException e) {
+            System.err.println("Gagal load username: " + e.getMessage());
         }
-
-        JScrollPane scrollPane = new JScrollPane(historyContainer);
-        scrollPane.setOpaque(false);
-        scrollPane.setBorder(BorderFactory.createEmptyBorder()); 
-        scrollPane.getViewport().setOpaque(false);
-        scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
-
-        return scrollPane;
     }
 
-    // ================== BUAT ITEM RIWAYAT ==================
-
-    private JPanel createHistoryItem(Object[] session) {
-        JPanel panel = new JPanel(new BorderLayout(15, 0));
-        panel.setOpaque(true);
-        panel.setBackground(Theme.BACKGROUND_TRANSLUCENT); 
-        panel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(Theme.PROGRESS_BAR_FG, 1), 
-            new EmptyBorder(10, 15, 10, 15)
-        ));
-        panel.setMaximumSize(new Dimension(600, 80)); 
-        panel.setAlignmentX(Component.CENTER_ALIGNMENT);
+    private void loadHistoryData() {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+        List<Object[]> dataList = db.getSessionHistory(userId);
         
-        // --- 1. Sisi Kiri (Nama Sesi & Tanggal) ---
-        JPanel leftPanel = new JPanel(new GridLayout(2, 1));
-        leftPanel.setOpaque(false);
-        
-        String sessionName = (String) session[0]; 
-        JLabel lblName = new JLabel(sessionName);
-        lblName.setFont(Theme.FONT_BODYBOLD.deriveFont(20f)); // Font lebih besar
-        lblName.setForeground(Theme.TEXT_WHITE);
-        leftPanel.add(lblName);
-        
-        Timestamp timestamp = (Timestamp) session[4]; 
-        String dateText = "Date N/A";
-        if (timestamp != null) {
-            dateText = LocalDateTime.ofInstant(timestamp.toInstant(), java.time.ZoneId.systemDefault())
-                                     .format(DATE_FORMAT);
+        for (Object[] row : dataList) {
+            String sessionName = (String) row[0];
+            int work = (int) row[1];
+            int sb = (int) row[2];
+            int lb = (int) row[3];
+            Timestamp date = (Timestamp) row[4];
+            
+            String dateStr = (date != null) ? dateFormat.format(date) : "-";
+            String formattedSession = "<html><div style='padding-left:10px;'>" + 
+                                      "<b style='font-size:14px'>" + sessionName + "</b><br>" +
+                                      "<span style='color:#cccccc; font-size:11px'>" + dateStr + "</span>" +
+                                      "</div></html>";
+            
+            tableModel.addRow(new Object[]{formattedSession, work, sb, lb});
         }
-        JLabel lblDate = new JLabel(dateText);
-        lblDate.setFont(Theme.FONT_CAPTION); 
-        lblDate.setForeground(Theme.TEXT_WHITE.darker()); 
-        leftPanel.add(lblDate);
-        
-        panel.add(leftPanel, BorderLayout.WEST);
-
-        // --- 2. Sisi Kanan (Detail Durasi) ---
-        int workMin = (Integer) session[1];
-        int sbMin = (Integer) session[2];
-        int lbMin = (Integer) session[3];
-
-        JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 0));
-        rightPanel.setOpaque(false);
-
-        rightPanel.add(createDurationItem(workMin, "Work", Theme.PROGRESS_BAR_FG)); 
-        rightPanel.add(createDurationItem(sbMin, "S.Break", new Color(135, 206, 235))); // Light Blue
-        rightPanel.add(createDurationItem(lbMin, "L.Break", new Color(255, 165, 0))); // Orange
-
-        panel.add(rightPanel, BorderLayout.EAST);
-        
-        return panel;
     }
 
-    // Helper untuk membuat label durasi yang kecil
-    private JPanel createDurationItem(int minutes, String label, Color color) {
-        JPanel item = new JPanel();
-        item.setOpaque(false);
-        item.setLayout(new BoxLayout(item, BoxLayout.Y_AXIS));
-
-        JLabel lblValue = new JLabel(minutes + "m");
-        lblValue.setFont(Theme.FONT_BODYBOLD.deriveFont(18f)); 
-        lblValue.setForeground(color); 
-        lblValue.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-        JLabel lblLabel = new JLabel(label);
-        lblLabel.setFont(Theme.FONT_CAPTION); 
-        lblLabel.setForeground(Theme.TEXT_WHITE.darker());
-        lblLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-        item.add(lblValue);
-        item.add(lblLabel);
-        return item;
-    }
+    // --- RENDERERS ---
     
-    // Helper untuk membuat Image Button baru
+    // Renderer Header Transparan
+    class TransparentHeaderRenderer extends DefaultTableCellRenderer {
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            // Gunakan JLabel biasa, jangan super.getTableCell... karena sering membawa style default L&F
+            JLabel l = new JLabel();
+            l.setText(value.toString());
+            l.setOpaque(false); // PENTING
+            l.setBackground(new Color(0,0,0,0));
+            l.setForeground(Theme.TEXT_WHITE);
+            l.setFont(Theme.FONT_BUTTON.deriveFont(Font.BOLD, 14f));
+            
+            // Alignment
+            l.setHorizontalAlignment(column == 0 ? JLabel.LEFT : JLabel.CENTER);
+            if (column == 0) l.setBorder(new EmptyBorder(0, 10, 0, 0)); 
+            
+            return l;
+        }
+    }
+
+    // Renderer Cell Transparan
+    class TransparentCellRenderer extends DefaultTableCellRenderer {
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+            
+            l.setOpaque(false); // Pastikan false
+            l.setForeground(Theme.TEXT_WHITE);
+            
+            if (column == 0) {
+                l.setHorizontalAlignment(JLabel.LEFT);
+            } else {
+                l.setHorizontalAlignment(JLabel.CENTER);
+                l.setFont(Theme.FONT_BODY.deriveFont(16f)); 
+            }
+            
+            // Efek hover/selection
+            if (isSelected) {
+                l.setOpaque(true);
+                l.setBackground(new Color(255, 255, 255, 30));
+            } else {
+                l.setBackground(new Color(0,0,0,0));
+            }
+            
+            return l;
+        }
+    }
+
+    // --- UTILS UI ---
     private JButton createImageButton(String path, int size) {
         ImageIcon icon = new ImageIcon(path);
         Image img = icon.getImage().getScaledInstance(size, size, Image.SCALE_SMOOTH);
@@ -227,24 +287,12 @@ public class HistoryPanel extends JPanel {
         return btn;
     }
 
-    // Helper untuk mengubah Icon pada button yg sudah ada
-    private void updateButtonIcon(JButton btn, String path, int size) {
-        ImageIcon icon = new ImageIcon(path);
-        Image img = icon.getImage().getScaledInstance(size, size, Image.SCALE_SMOOTH);
-        btn.setIcon(new ImageIcon(img));
-        btn.repaint();
-    }
-
-    // ================== PAINT BACKGROUND ==================
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        
         if (backgroundImage != null) {
-            // Gambar Background Image jika ada
             g.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), this);
         } else {
-            // Fallback Gradient Background (JIKA TIDAK ADA background image)
             Graphics2D g2d = (Graphics2D) g;
             GradientPaint gp = new GradientPaint(
                 0, 0, new Color(22, 33, 62), 
