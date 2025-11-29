@@ -57,7 +57,7 @@ public class LoginPanel extends JPanel {
                 Graphics2D g2d = (Graphics2D) g;
                 g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 
-                g2d.setColor(new Color(0, 0, 0, 100));
+                g2d.setColor(Theme.BACKGROUND_TRANSLUCENT);
                 g2d.fillRoundRect(0, 0, getWidth(), getHeight(), 20, 20);
             }
         };
@@ -67,40 +67,38 @@ public class LoginPanel extends JPanel {
         
         // Title
         JLabel titleLabel = new JLabel("time2focus", SwingConstants.CENTER);
-        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 42));
+        titleLabel.setFont(Theme.FONT_TITLE);
         titleLabel.setForeground(Color.WHITE);
-        titleLabel.setBounds(0, 20, 400, 60);
+        titleLabel.setBounds(0, 10, 400, 60);
         
         // Username label
         JLabel userLabel = new JLabel("username:");
-        userLabel.setFont(new Font("Segoe UI", Font.PLAIN, 16));
+        userLabel.setFont(Theme.FONT_BODYBOLD);
         userLabel.setForeground(Color.WHITE);
-        userLabel.setBounds(60, 100, 100, 25);
+        userLabel.setBounds(60, 90, 100, 25);
         
         // Username field
         usernameField = createStyledTextField();
-        usernameField.setBounds(60, 130, 280, 45);
+        usernameField.setBounds(60, 120, 280, 45);
         
         // Password label
         JLabel passLabel = new JLabel("password:");
-        passLabel.setFont(new Font("Segoe UI", Font.PLAIN, 16));
+        passLabel.setFont(Theme.FONT_BODYBOLD);
         passLabel.setForeground(Color.WHITE);
-        passLabel.setBounds(60, 190, 100, 25);
+        passLabel.setBounds(60, 180, 100, 25);
         
         // Password field
         passwordField = createStyledPasswordField();
-        passwordField.setBounds(60, 220, 280, 45);
+        passwordField.setBounds(60, 210, 280, 45);
         
         // Login button
-        JButton loginBtn = createStyledButton("login");
-        loginBtn.setBounds(100, 285, 200, 45);
+        JButton loginBtn = new ButtonDefault("login");
+        loginBtn.setBounds(100, 275, 200, 40);
         loginBtn.addActionListener(e -> handleLogin());
         
         // Register button
-        JButton registerBtn = createStyledButton("register");
-        registerBtn.setBounds(100, 340, 200, 45);
-        registerBtn.setBackground(new Color(80, 80, 80, 200));
-        registerBtn.setForeground(Color.WHITE);
+        JButton registerBtn = new ButtonDefault("register");
+        registerBtn.setBounds(100, 330, 200, 40);
         registerBtn.addActionListener(e -> handleRegister());
         
         // Add all components to form container
@@ -159,8 +157,8 @@ public class LoginPanel extends JPanel {
         };
         
         field.setOpaque(false);
-        field.setBackground(new Color(255, 255, 255, 230));
-        field.setFont(new Font("Segoe UI", Font.PLAIN, 16));
+        field.setBackground(Color.WHITE);
+        field.setFont(Theme.FONT_CAPTION);
         field.setForeground(new Color(40, 40, 40));
         field.setBorder(BorderFactory.createEmptyBorder(8, 15, 8, 15));
         
@@ -184,58 +182,18 @@ public class LoginPanel extends JPanel {
             protected void paintBorder(Graphics g) {
                 Graphics2D g2d = (Graphics2D) g;
                 g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2d.setColor(new Color(200, 200, 200, 100));
+                g2d.setColor(Color.WHITE);
                 g2d.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 25, 25);
             }
         };
         
         field.setOpaque(false);
-        field.setBackground(new Color(255, 255, 255, 230));
-        field.setFont(new Font("Segoe UI", Font.PLAIN, 16));
+        field.setBackground(Color.WHITE);
+        field.setFont(Theme.FONT_CAPTION);
         field.setForeground(new Color(40, 40, 40));
         field.setBorder(BorderFactory.createEmptyBorder(8, 15, 8, 15));
         
         return field;
-    }
-    
-    private JButton createStyledButton(String text) {
-        JButton button = new JButton(text) {
-            @Override
-            protected void paintComponent(Graphics g) {
-                Graphics2D g2d = (Graphics2D) g;
-                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                
-                if (getModel().isPressed()) {
-                    g2d.setColor(getBackground().darker());
-                } else if (getModel().isRollover()) {
-                    g2d.setColor(getBackground().brighter());
-                } else {
-                    g2d.setColor(getBackground());
-                }
-                
-                g2d.fillRoundRect(0, 0, getWidth(), getHeight(), 30, 30);
-                
-                g2d.setColor(getForeground());
-                g2d.setFont(getFont());
-                FontMetrics fm = g2d.getFontMetrics();
-                int textWidth = fm.stringWidth(getText());
-                int textHeight = fm.getAscent();
-                int x = (getWidth() - textWidth) / 2;
-                int y = (getHeight() + textHeight) / 2 - 3;
-                g2d.drawString(getText(), x, y);
-            }
-        };
-        
-        button.setOpaque(false);
-        button.setContentAreaFilled(false);
-        button.setBorderPainted(false);
-        button.setFocusPainted(false);
-        button.setBackground(new Color(255, 255, 255, 220));
-        button.setForeground(new Color(40, 40, 40));
-        button.setFont(new Font("Segoe UI", Font.BOLD, 16));
-        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        
-        return button;
     }
     
     private void handleLogin() {
@@ -283,7 +241,7 @@ public class LoginPanel extends JPanel {
     
     private void openMainMenu(int userId) {
         // 1. Buat MainMenuPanel untuk user ini
-        MainMenuPanel mainMenu = new MainMenuPanel(userId, db);
+        MainMenuPanel mainMenu = new MainMenuPanel(userId, db, parentFrame);
 
         // 2. Buat PomodoroController dan sambungkan dengan mainMenu
         PomodoroController controller = new PomodoroController(mainMenu, db, userId);

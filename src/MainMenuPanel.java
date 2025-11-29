@@ -9,6 +9,7 @@ public class MainMenuPanel extends JPanel {
     private PomodoroController controller;
     private int userId;
     private KoneksiDatabase db;
+    private JFrame parentFrame;
 
     // --- DATA DARI DB ---
     private Image backgroundImage;
@@ -17,11 +18,10 @@ public class MainMenuPanel extends JPanel {
     // --- KOMPONEN UI ---
     private CardLayout timerCardLayout; 
     private JPanel timerContainer;      
-    private JTextField sessionInput;
     private JLabel lblSessionTitle;
     private JLabel lblPhase;
     private JLabel lblTimer;
-    private JProgressBar progressBar;
+    private JLabel lblCounter;
     private int workDuration = 25;
     private int shortBreakDuration = 5;
     private int longBreakDuration = 15;
@@ -37,7 +37,7 @@ public class MainMenuPanel extends JPanel {
     private boolean isPaused = false; // State untuk melacak pause
 
     // --- PATH ASSETS ---
-    // Sidebar & Music
+    // Sidebar 
     private final String PATH_ICON_SETTING = "assets/button/SettingButton.png";
     private final String PATH_ICON_HISTORY = "assets/button/HistoryButton.png";
     private final String PATH_ICON_MUSIC_ON = "assets/button/SongButton.png";
@@ -49,9 +49,10 @@ public class MainMenuPanel extends JPanel {
     private final String PATH_ICON_RESTART = "assets/button/RestartButton.png";
 
     // Constructor
-    public MainMenuPanel(int userId, KoneksiDatabase db) {
+    public MainMenuPanel(int userId, KoneksiDatabase db, JFrame parentFrame) {
         this.userId = userId;
         this.db = db;
+        this.parentFrame = parentFrame;
 
         setLayout(new BorderLayout());
         
@@ -64,9 +65,13 @@ public class MainMenuPanel extends JPanel {
         sidebar.setLayout(new BoxLayout(sidebar, BoxLayout.Y_AXIS));
         sidebar.setBorder(new EmptyBorder(30, 20, 0, 0));
 
-        sidebar.add(createImageButton(PATH_ICON_SETTING, 40));
+        JButton btnSetting = createImageButton(PATH_ICON_SETTING, 40);
+        btnSetting.addActionListener(e -> openSettingsPanel());
+        sidebar.add(btnSetting);
         sidebar.add(Box.createVerticalStrut(20));
-        sidebar.add(createImageButton(PATH_ICON_HISTORY, 40));
+        JButton btnHistory = createImageButton(PATH_ICON_HISTORY, 40);
+        btnHistory.addActionListener(e -> openHistoryPanel());
+        sidebar.add(btnHistory);
         sidebar.add(Box.createVerticalStrut(20));
         
         // Tombol Music (Toggle)
@@ -90,13 +95,6 @@ public class MainMenuPanel extends JPanel {
         gbc.insets = new Insets(10, 0, 10, 0);
         centerPanel.add(lblSessionTitle, gbc);
 
-        lblPhase = new JLabel("-");                       // awalnya belum ada fase
-        lblPhase.setFont(Theme.FONT_BODYBOLD);            // bebas, pilih font yang kamu mau
-        lblPhase.setForeground(Theme.TEXT_WHITE);
-        gbc.gridy = 1;
-        gbc.insets = new Insets(0, 0, 10, 0);
-        centerPanel.add(lblPhase, gbc);
-
         // B. Indikator Fase
         centerPanel.add(createPhaseIndicator(), setGbc(gbc, 1, 8, 14));
 
@@ -119,6 +117,15 @@ public class MainMenuPanel extends JPanel {
         timerWrapper.setOpaque(false);
         timerWrapper.setPreferredSize(new Dimension(360, 180));
         timerWrapper.setBorder(new EmptyBorder(14, 14, 14, 14));
+        timerWrapper.setLayout(new BorderLayout());
+
+        // Label Phase di atas timer
+        lblPhase = new JLabel("-");
+        lblPhase.setFont(Theme.FONT_BODYBOLD);            
+        lblPhase.setForeground(Theme.TEXT_WHITE);
+        lblPhase.setHorizontalAlignment(SwingConstants.CENTER);
+        lblPhase.setBorder(new EmptyBorder(0, 0, 0, 0));
+        timerWrapper.add(lblPhase, BorderLayout.NORTH);
         
         // Card Timer
         JPanel cardTimer = new JPanel(new GridBagLayout());
@@ -128,29 +135,17 @@ public class MainMenuPanel extends JPanel {
         lblTimer.setForeground(Theme.TEXT_WHITE);
         cardTimer.add(lblTimer);
 
-        // Card Input
-        JPanel cardInput = createInputPanel();
-
         timerContainer.add(cardTimer, "TIMER");
-        timerContainer.add(cardInput, "INPUT");
-        timerWrapper.add(timerContainer);
+        timerWrapper.add(timerContainer, BorderLayout.CENTER);
         centerPanel.add(timerWrapper, setGbc(gbc, 2, 0, 0));
 
         // D. Counter
-        JLabel lblCounter = new JLabel("total work(s) finished: 0");
+        lblCounter = new JLabel("total work(s) finished: 0");
         lblCounter.setFont(Theme.FONT_CAPTION); 
         lblCounter.setForeground(Theme.TEXT_WHITE);
         centerPanel.add(lblCounter, setGbc(gbc, 3, 15, 5));
 
-        // E. Progress Bar
-        progressBar = new JProgressBar(0, 100);
-        progressBar.setPreferredSize(new Dimension(400, 4));
-        progressBar.setForeground(Theme.PROGRESS_BAR_FG);
-        progressBar.setBackground(Theme.PROGRESS_BAR_BG);
-        progressBar.setBorderPainted(false);
-        centerPanel.add(progressBar, setGbc(gbc, 4, 0, 0));
-
-        // F. Kontrol Tombol (Restart, Start, Pause/Resume)
+        // E. Kontrol Tombol (Restart, Start, Pause/Resume)
         JPanel controlPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 0));
         controlPanel.setOpaque(false);
 
@@ -173,7 +168,7 @@ public class MainMenuPanel extends JPanel {
         controlPanel.add(btnStart);
         controlPanel.add(btnPauseResume);
         
-        centerPanel.add(controlPanel, setGbc(gbc, 5, 25, 0));
+        centerPanel.add(controlPanel, setGbc(gbc, 4, 25, 0));
 
         add(centerPanel, BorderLayout.CENTER);
         
@@ -219,6 +214,120 @@ public class MainMenuPanel extends JPanel {
         }
     }
 
+    private void openHistoryPanel() {
+        if (parentFrame == null) return;
+
+        HistoryPanel historyPanel = new HistoryPanel(userId, db);
+        parentFrame.getContentPane().removeAll();
+        parentFrame.setContentPane(historyPanel);
+        parentFrame.revalidate();
+        parentFrame.repaint();
+    }
+
+    private void openSettingsPanel() {
+        if (parentFrame == null) return;
+
+        SettingsPanel settingsPanel = new SettingsPanel(userId, db, parentFrame);
+        parentFrame.getContentPane().removeAll();
+        parentFrame.setContentPane(settingsPanel);
+        parentFrame.revalidate();
+        parentFrame.repaint();
+    }
+
+    private void showSessionInputDialog() {
+        if (parentFrame == null) return;
+
+        JDialog dialog = new JDialog(parentFrame, "New Session", true);
+        dialog.setUndecorated(true);
+        dialog.setBackground(new Color(0, 0, 0, 0));
+
+        JPanel container = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2 = (Graphics2D) g;
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(new Color(35, 35, 35, 230));
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 32, 32);
+                g2.setColor(Color.WHITE);
+                g2.setStroke(new BasicStroke(1.2f));
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 32, 32);
+            }
+        };
+        container.setLayout(new BoxLayout(container, BoxLayout.Y_AXIS));
+        container.setOpaque(false);
+        container.setBorder(new EmptyBorder(18, 22, 18, 22));
+        container.setPreferredSize(new Dimension(520, 280));
+
+        // Header dengan tombol close (X)
+        JPanel header = new JPanel(new BorderLayout());
+        header.setOpaque(false);
+
+        JButton btnClose = new JButton("X");
+        btnClose.setFont(Theme.FONT_TITLE.deriveFont(20f));
+        btnClose.setForeground(Color.WHITE);
+        btnClose.setFocusPainted(false);
+        btnClose.setBorderPainted(false);
+        btnClose.setContentAreaFilled(false);
+        btnClose.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnClose.addActionListener(e -> dialog.dispose());
+        header.add(btnClose, BorderLayout.EAST);
+        header.setAlignmentX(Component.CENTER_ALIGNMENT);
+        container.add(header);
+
+        container.add(Box.createVerticalStrut(10));
+
+        JLabel title = new JLabel("what do you want to do?");
+        title.setFont(Theme.FONT_TITLE.deriveFont(28f));
+        title.setForeground(Color.WHITE);
+        title.setHorizontalAlignment(SwingConstants.CENTER);
+        title.setAlignmentX(Component.CENTER_ALIGNMENT);
+        container.add(title);
+
+        container.add(Box.createVerticalStrut(24));
+
+        // Input field
+        JTextField txtSession = new JTextField();
+        txtSession.setFont(Theme.FONT_BODY.deriveFont(18f));
+        txtSession.setForeground(Color.WHITE);
+        txtSession.setOpaque(true);
+        txtSession.setBackground(new Color(25, 25, 25));
+        txtSession.setHorizontalAlignment(JTextField.CENTER);
+        txtSession.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createMatteBorder(0, 0, 2, 0, Color.WHITE),
+            BorderFactory.createEmptyBorder(10, 12, 10, 12)
+        ));
+        txtSession.setCaretColor(Color.WHITE);
+        txtSession.setSelectionColor(new Color(255, 255, 255, 80));
+        txtSession.setSelectedTextColor(Color.WHITE);
+        txtSession.setMaximumSize(new Dimension(400, 46));
+        txtSession.setAlignmentX(Component.CENTER_ALIGNMENT);
+        container.add(txtSession);
+        container.add(Box.createVerticalStrut(28));
+
+        // Tombol save
+        ButtonDefault btnSave = new ButtonDefault("save");
+        btnSave.setFont(Theme.FONT_BUTTON.deriveFont(14f));
+        btnSave.setPreferredSize(new Dimension(110, 42));
+        btnSave.setMaximumSize(new Dimension(130, 42));
+        
+        btnSave.addActionListener(e -> {
+            startTheTimer(txtSession.getText());
+            dialog.dispose();
+        });
+        JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+        footer.setOpaque(false);
+        footer.add(btnSave);
+        footer.setAlignmentX(Component.CENTER_ALIGNMENT);
+        container.add(footer);
+
+        dialog.setContentPane(container);
+        dialog.pack();
+        dialog.setLocationRelativeTo(parentFrame);
+        SwingUtilities.invokeLater(txtSession::requestFocusInWindow);
+        dialog.setVisible(true);
+    }
+
     // --- LOGIC TIMER (PAUSE / RESUME / RESTART) ---
     
     // Toggle Pause/Resume
@@ -246,29 +355,25 @@ public class MainMenuPanel extends JPanel {
         // Reset timer ke awal
         controller.resetCurrentPhase();
         
-        // Jika restart, anggap otomatis jalan lagi (unpause)
-        isPaused = false;
-        updateButtonIcon(btnPauseResume, PATH_ICON_PAUSE, 50);
+        // Setelah restart, tampilkan ikon Resume agar user bisa melanjutkan
+        isPaused = true;
+        updateButtonIcon(btnPauseResume, PATH_ICON_RESUME, 50);
     }
     
     // Start / End Logic
     private void handleStartButton() {
         if (!isSessionActive) {
-            // Buka Input Panel
-            timerCardLayout.show(timerContainer, "INPUT");
-            SwingUtilities.invokeLater(() -> sessionInput.requestFocusInWindow());
+            showSessionInputDialog();
         } else {
             // Akhiri Sesi
             endSession();
         }
     }
-    
-    private void startTheTimer() {
-        String namaSesi = sessionInput.getText();
+
+    private void startTheTimer(String namaSesi) {
         if (namaSesi.trim().isEmpty()) namaSesi = "session";
         
         lblSessionTitle.setText(namaSesi);
-        timerCardLayout.show(timerContainer, "TIMER");
 
          if (controller != null) {
             controller.startNewSession(namaSesi);
@@ -295,7 +400,6 @@ public class MainMenuPanel extends JPanel {
         isPaused = false;
         
         lblSessionTitle.setText("session ended");
-        sessionInput.setText("");
         
         // Reset icon pause ke default
         updateButtonIcon(btnPauseResume, PATH_ICON_PAUSE, 50);
@@ -332,56 +436,6 @@ public class MainMenuPanel extends JPanel {
         return gbc;
     }
 
-    private JPanel createInputPanel() {
-        JPanel panel = new JPanel();
-        panel.setOpaque(false);
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        panel.setBorder(new EmptyBorder(10, 0, 10, 0));
-
-        JLabel lblQ = new JLabel("what do you want to do?");
-        lblQ.setFont(Theme.FONT_BODYBOLD); 
-        lblQ.setForeground(Theme.TEXT_WHITE);
-        lblQ.setAlignmentX(Component.CENTER_ALIGNMENT);
-        panel.add(lblQ);
-
-        panel.add(Box.createVerticalStrut(18));
-
-        sessionInput = new JTextField(20);
-        sessionInput.setText("");
-        sessionInput.setFont(Theme.FONT_BODY.deriveFont(18f));
-        sessionInput.setForeground(Theme.TEXT_WHITE);
-        sessionInput.setOpaque(true);
-        sessionInput.setBackground(new Color(0, 0, 0, 150));
-        sessionInput.setHorizontalAlignment(JTextField.CENTER);
-        sessionInput.setPreferredSize(new Dimension(300, 40));
-        sessionInput.setMaximumSize(new Dimension(300, 40));
-        sessionInput.setMinimumSize(new Dimension(300, 40));
-        sessionInput.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createMatteBorder(0, 0, 2, 0, Color.WHITE),
-            BorderFactory.createEmptyBorder(6, 10, 6, 10)
-        ));
-        sessionInput.setCaretColor(Color.WHITE);
-        sessionInput.setSelectionColor(new Color(255, 255, 255, 80));
-        sessionInput.setSelectedTextColor(Color.WHITE);
-        sessionInput.setEditable(true);
-        sessionInput.setFocusable(true);
-        sessionInput.setAlignmentX(Component.CENTER_ALIGNMENT);
-        panel.add(sessionInput);
-
-        panel.add(Box.createVerticalStrut(18));
-
-        ButtonDefault btnSave = new ButtonDefault("save");
-        btnSave.setPreferredSize(new Dimension(80, 35));
-        btnSave.setMaximumSize(new Dimension(80, 35));
-        btnSave.setMinimumSize(new Dimension(80, 35));
-        btnSave.setFont(Theme.FONT_BUTTON.deriveFont(18f));
-        btnSave.addActionListener(e -> startTheTimer());
-        btnSave.setAlignmentX(Component.CENTER_ALIGNMENT);
-        panel.add(btnSave);
-
-        return panel;
-    }
-    
     private JPanel createPhaseIndicator() {
         JPanel container = new JPanel(new GridLayout(1, 3, 16, 0)) {
             @Override
@@ -445,6 +499,11 @@ public class MainMenuPanel extends JPanel {
         this.controller = controller;
     }
 
+    public void setPauseState(boolean paused) {
+        this.isPaused = paused;
+        updateButtonIcon(btnPauseResume, paused ? PATH_ICON_RESUME : PATH_ICON_PAUSE, 50);
+    }
+
     // misal labelnya bernama timerLabel dan phaseLabel:
     public void updateTimerLabel(String timeText) {
         lblTimer.setText(timeText);
@@ -452,5 +511,9 @@ public class MainMenuPanel extends JPanel {
 
     public void updatePhaseLabel(String phaseName) {
         lblPhase.setText(phaseName);
+    }
+
+    public void updateWorkCounter(int count) {
+        lblCounter.setText("total work(s) finished: " + count);
     }
 }

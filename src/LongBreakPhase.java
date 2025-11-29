@@ -6,11 +6,11 @@ public class LongBreakPhase extends PomodoroPhase {
 
     @Override
     public String getPhaseName() {
-        return "Long Break";
+        return "long break";
     }
 
     @Override
     public void onPhaseFinished(PomodoroController controller) {
+        controller.handleLongBreakPhaseFinished(this);
     }
 }
-

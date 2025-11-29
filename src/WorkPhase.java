@@ -6,10 +6,11 @@ public class WorkPhase extends PomodoroPhase {
 
     @Override
     public String getPhaseName() {
-        return "Work";
+        return "work";
     }
 
     @Override
     public void onPhaseFinished(PomodoroController controller) {
+        controller.handleWorkPhaseFinished(this);
     }
 }

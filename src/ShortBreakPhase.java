@@ -6,11 +6,11 @@ public class ShortBreakPhase extends PomodoroPhase {
 
     @Override
     public String getPhaseName() {
-        return "Short Break";
+        return "short break";
     }
 
     @Override
     public void onPhaseFinished(PomodoroController controller) {
+        controller.handleShortBreakPhaseFinished(this);
     }
 }
-
