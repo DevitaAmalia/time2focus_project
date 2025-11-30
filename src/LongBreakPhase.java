@@ -6,7 +6,7 @@ public class LongBreakPhase extends PomodoroPhase {
 
     @Override
     public String getPhaseName() {
-        return "long break";
+        return "Long Break";
     }
 
     @Override

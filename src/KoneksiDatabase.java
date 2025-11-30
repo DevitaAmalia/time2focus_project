@@ -13,8 +13,8 @@ class KoneksiDatabase {
     // ================= Konstruktor =================
     public KoneksiDatabase() {
         this.dbName = "time2focus";
-        this.username = "root";
-        this.pass = "";
+        this.username = "time2focus";
+        this.pass = "time2focus";
 
         this.dbUrl = "jdbc:mysql://localhost:3306/" + this.dbName;
 
@@ -37,61 +37,56 @@ class KoneksiDatabase {
     // ================= Inisialisasi Database =================
     public void initialize() {
 
-        String createUsersTableSql =
-            "CREATE TABLE IF NOT EXISTS users (" +
-            "  id_user INT NOT NULL AUTO_INCREMENT," +
-            "  username VARCHAR(50) NOT NULL," +
-            "  password VARCHAR(255) NOT NULL," +
-            "  PRIMARY KEY (id_user)," +
-            "  UNIQUE KEY username (username)" +
-            ")";
+        String createUsersTableSql = "CREATE TABLE IF NOT EXISTS users (" +
+                "  id_user INT NOT NULL AUTO_INCREMENT," +
+                "  username VARCHAR(50) NOT NULL," +
+                "  password VARCHAR(255) NOT NULL," +
+                "  PRIMARY KEY (id_user)," +
+                "  UNIQUE KEY username (username)" +
+                ")";
 
-        String createBackgroundsTableSql =
-            "CREATE TABLE IF NOT EXISTS backgrounds (" +
-            "  id_bg INT NOT NULL AUTO_INCREMENT," +
-            "  nama_bg VARCHAR(50)," +
-            "  path_bg VARCHAR(255) NOT NULL," +
-            "  PRIMARY KEY (id_bg)" +
-            ")";
+        String createBackgroundsTableSql = "CREATE TABLE IF NOT EXISTS backgrounds (" +
+                "  id_bg INT NOT NULL AUTO_INCREMENT," +
+                "  nama_bg VARCHAR(50)," +
+                "  path_bg VARCHAR(255) NOT NULL," +
+                "  PRIMARY KEY (id_bg)" +
+                ")";
 
-        String createMusicsTableSql =
-            "CREATE TABLE IF NOT EXISTS musics (" +
-            "  id_music INT NOT NULL AUTO_INCREMENT," +
-            "  nama_music VARCHAR(50)," +
-            "  path_music VARCHAR(255) NOT NULL," +
-            "  PRIMARY KEY (id_music)" +
-            ")";
+        String createMusicsTableSql = "CREATE TABLE IF NOT EXISTS musics (" +
+                "  id_music INT NOT NULL AUTO_INCREMENT," +
+                "  nama_music VARCHAR(50)," +
+                "  path_music VARCHAR(255) NOT NULL," +
+                "  PRIMARY KEY (id_music)" +
+                ")";
 
-        String createSettingsTableSql =
-            "CREATE TABLE IF NOT EXISTS settings (" +
-            "  id_setting INT NOT NULL AUTO_INCREMENT," +
-            "  id_user INT NOT NULL UNIQUE," +
-            "  work_duration INT NOT NULL DEFAULT 25," +
-            "  sb_duration INT NOT NULL DEFAULT 5," +
-            "  lb_duration INT NOT NULL DEFAULT 15," +
-            "  id_bg INT DEFAULT 1," +
-            "  id_music INT DEFAULT 1," +
-            "  PRIMARY KEY (id_setting)," +
-            "  FOREIGN KEY (id_user) REFERENCES users(id_user) ON DELETE CASCADE," +
-            "  FOREIGN KEY (id_bg) REFERENCES backgrounds(id_bg) ON DELETE SET NULL," +
-            "  FOREIGN KEY (id_music) REFERENCES musics(id_music) ON DELETE SET NULL" +
-            ")";
+        String createSettingsTableSql = "CREATE TABLE IF NOT EXISTS settings (" +
+                "  id_setting INT NOT NULL AUTO_INCREMENT," +
+                "  id_user INT NOT NULL UNIQUE," +
+                "  work_duration INT NOT NULL DEFAULT 25," +
+                "  sb_duration INT NOT NULL DEFAULT 5," +
+                "  lb_duration INT NOT NULL DEFAULT 15," +
+                "  id_bg INT DEFAULT 1," +
+                "  id_music INT DEFAULT 1," +
+                "  PRIMARY KEY (id_setting)," +
+                "  FOREIGN KEY (id_user) REFERENCES users(id_user) ON DELETE CASCADE," +
+                "  FOREIGN KEY (id_bg) REFERENCES backgrounds(id_bg) ON DELETE SET NULL," +
+                "  FOREIGN KEY (id_music) REFERENCES musics(id_music) ON DELETE SET NULL" +
+                ")";
 
-        String createHistoryTableSql =
-            "CREATE TABLE IF NOT EXISTS history (" +
-            "  id_history INT NOT NULL AUTO_INCREMENT," +
-            "  id_user INT NOT NULL," +
-            "  nama_session VARCHAR(100) NOT NULL," +
-            "  work INT NOT NULL," +
-            "  short_break INT NOT NULL," +
-            "  long_break INT NOT NULL," +
-            "  session_date DATETIME NOT NULL," +
-            "  PRIMARY KEY (id_history)," +
-            "  FOREIGN KEY (id_user) REFERENCES users(id_user) ON DELETE CASCADE" +
-            ")";
+        String createHistoryTableSql = "CREATE TABLE IF NOT EXISTS history (" +
+                "  id_history INT NOT NULL AUTO_INCREMENT," +
+                "  id_user INT NOT NULL," +
+                "  nama_session VARCHAR(100) NOT NULL," +
+                "  work INT NOT NULL," +
+                "  short_break INT NOT NULL," +
+                "  long_break INT NOT NULL," +
+                "  session_date DATETIME NOT NULL," +
+                "  PRIMARY KEY (id_history)," +
+                "  FOREIGN KEY (id_user) REFERENCES users(id_user) ON DELETE CASCADE" +
+                ")";
 
         try (Connection conn = getConnection();
-             Statement stmt = conn.createStatement()) {
+                Statement stmt = conn.createStatement()) {
 
             if (conn != null) {
                 stmt.execute(createUsersTableSql);
@@ -117,19 +112,18 @@ class KoneksiDatabase {
         String insertSql = "INSERT INTO backgrounds (nama_bg, path_bg) VALUES (?, ?)";
 
         try (Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(countSql)) {
+                ResultSet rs = stmt.executeQuery(countSql)) {
 
             if (rs.next() && rs.getInt(1) == 0) {
                 System.out.println("Tabel 'backgrounds' kosong. Memuat data default...");
 
                 List<String[]> defaultBg = Arrays.asList(
-                    new String[]{"City Scrapper", "assets/background/city_scrapper.png"},
-                    new String[]{"Firework Festive", "assets/background/firework_festive.png"},
-                    new String[]{"Fractal Library", "assets/background/fractal_library.png"},
-                    new String[]{"Midnight Forest", "assets/background/midnight_forest.png"},
-                    new String[]{"Night Riverside", "assets/background/night_riverside.png"},
-                    new String[]{"Sunset in The Beach", "assets/background/sunset_in_the_beach.png"}
-                );
+                        new String[] { "City Scrapper", "assets/background/city_scrapper.png" },
+                        new String[] { "Firework Festive", "assets/background/firework_festive.png" },
+                        new String[] { "Fractal Library", "assets/background/fractal_library.png" },
+                        new String[] { "Midnight Forest", "assets/background/midnight_forest.png" },
+                        new String[] { "Night Riverside", "assets/background/night_riverside.png" },
+                        new String[] { "Sunset in The Beach", "assets/background/sunset_in_the_beach.png" });
 
                 try (PreparedStatement pstmt = conn.prepareStatement(insertSql)) {
                     for (String[] bg : defaultBg) {
@@ -152,16 +146,15 @@ class KoneksiDatabase {
         String insertSql = "INSERT INTO musics (nama_music, path_music) VALUES (?, ?)";
 
         try (Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(countSql)) {
+                ResultSet rs = stmt.executeQuery(countSql)) {
 
             if (rs.next() && rs.getInt(1) == 0) {
                 System.out.println("Tabel 'musics' kosong. Memuat data default...");
 
                 List<String[]> defaultMusic = Arrays.asList(
-                    new String[]{"Midsummer Rain", "assets/backsound/midsummer_rain.wav"},
-                    new String[]{"Wasteland Route", "assets/backsound/wasteland_route.wav"},
-                    new String[]{"Weightless Paradise", "assets/backsound/weightless_paradise.wav"}
-                );
+                        new String[] { "Midsummer Rain", "assets/backsound/midsummer_rain.wav" },
+                        new String[] { "Wasteland Route", "assets/backsound/wasteland_route.wav" },
+                        new String[] { "Weightless Paradise", "assets/backsound/weightless_paradise.wav" });
 
                 try (PreparedStatement pstmt = conn.prepareStatement(insertSql)) {
                     for (String[] music : defaultMusic) {
@@ -178,7 +171,6 @@ class KoneksiDatabase {
         }
     }
 
-
     // ================= Register User =================
     public boolean registerUser(String username, String password) {
         String insertUserSql = "INSERT INTO users (username, password) VALUES (?, ?)";
@@ -190,8 +182,7 @@ class KoneksiDatabase {
             int newUserId = -1;
 
             // Insert User
-            try (PreparedStatement pstmt =
-                     conn.prepareStatement(insertUserSql, Statement.RETURN_GENERATED_KEYS)) {
+            try (PreparedStatement pstmt = conn.prepareStatement(insertUserSql, Statement.RETURN_GENERATED_KEYS)) {
 
                 pstmt.setString(1, username);
                 pstmt.setString(2, password);
@@ -236,7 +227,7 @@ class KoneksiDatabase {
         String sql = "SELECT id_user FROM users WHERE username = ? AND password = ?";
 
         try (Connection conn = getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setString(1, username);
             pstmt.setString(2, password);
@@ -256,14 +247,14 @@ class KoneksiDatabase {
 
     // ================= Simpan History Session =================
     public boolean saveSessionHistory(int userId, String sessionName,
-                                      int workTime, int sbTime, int lbTime) {
+            int workTime, int sbTime, int lbTime) {
 
         String sql = "INSERT INTO history " +
-                     "(id_user, nama_session, work, short_break, long_break, session_date) " +
-                     "VALUES (?, ?, ?, ?, ?, NOW())";
+                "(id_user, nama_session, work, short_break, long_break, session_date) " +
+                "VALUES (?, ?, ?, ?, ?, NOW())";
 
         try (Connection conn = getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setInt(1, userId);
             pstmt.setString(2, sessionName);
@@ -284,10 +275,10 @@ class KoneksiDatabase {
         List<Object[]> list = new ArrayList<>();
 
         String sql = "SELECT nama_session, work, short_break, long_break, session_date " +
-                     "FROM history WHERE id_user = ? ORDER BY session_date DESC";
+                "FROM history WHERE id_user = ? ORDER BY session_date DESC";
 
         try (Connection conn = getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setInt(1, userId);
 
@@ -314,17 +305,16 @@ class KoneksiDatabase {
     public Map<String, Object> getUserSettings(int userId) {
         Map<String, Object> map = new HashMap<>();
 
-        String sql =
-            "SELECT s.work_duration, s.sb_duration, s.lb_duration, " +
-            "       s.id_bg, s.id_music, " +
-            "       b.path_bg, m.path_music " +
-            "FROM settings s " +
-            "LEFT JOIN backgrounds b ON s.id_bg = b.id_bg " +
-            "LEFT JOIN musics m ON s.id_music = m.id_music " +
-            "WHERE s.id_user = ?";
+        String sql = "SELECT s.work_duration, s.sb_duration, s.lb_duration, " +
+                "       s.id_bg, s.id_music, " +
+                "       b.path_bg, m.path_music " +
+                "FROM settings s " +
+                "LEFT JOIN backgrounds b ON s.id_bg = b.id_bg " +
+                "LEFT JOIN musics m ON s.id_music = m.id_music " +
+                "WHERE s.id_user = ?";
 
         try (Connection conn = getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setInt(1, userId);
 
@@ -349,17 +339,16 @@ class KoneksiDatabase {
 
     // ================= Update Setting User =================
     public boolean updateUserSettings(int userId,
-                                      int workDur, int sbDur, int lbDur,
-                                      int idBg, int idMusic) {
+            int workDur, int sbDur, int lbDur,
+            int idBg, int idMusic) {
 
-        String sql =
-            "UPDATE settings SET " +
-            "work_duration=?, sb_duration=?, lb_duration=?, " +
-            "id_bg=?, id_music=? " +
-            "WHERE id_user=?";
+        String sql = "UPDATE settings SET " +
+                "work_duration=?, sb_duration=?, lb_duration=?, " +
+                "id_bg=?, id_music=? " +
+                "WHERE id_user=?";
 
         try (Connection conn = getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setInt(1, workDur);
             pstmt.setInt(2, sbDur);
