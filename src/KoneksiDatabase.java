@@ -13,8 +13,8 @@ class KoneksiDatabase {
     // ================= Konstruktor =================
     public KoneksiDatabase() {
         this.dbName = "time2focus";
-        this.username = "time2focus";
-        this.pass = "time2focus";
+        this.username = "root";
+        this.pass = "";
 
         this.dbUrl = "jdbc:mysql://localhost:3306/" + this.dbName;
 
@@ -67,6 +67,7 @@ class KoneksiDatabase {
                 "  lb_duration INT NOT NULL DEFAULT 15," +
                 "  id_bg INT DEFAULT 1," +
                 "  id_music INT DEFAULT 1," +
+                "  cycle INT DEFAULT 4," +
                 "  PRIMARY KEY (id_setting)," +
                 "  FOREIGN KEY (id_user) REFERENCES users(id_user) ON DELETE CASCADE," +
                 "  FOREIGN KEY (id_bg) REFERENCES backgrounds(id_bg) ON DELETE SET NULL," +

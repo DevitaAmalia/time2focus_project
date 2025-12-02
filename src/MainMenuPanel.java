@@ -4,6 +4,9 @@ import java.awt.*;
 import java.util.Map;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.DocumentFilter;
+import javax.swing.JEditorPane;
+import javax.swing.text.html.HTMLEditorKit;
+import javax.swing.text.html.StyleSheet;
 
 public class MainMenuPanel extends JPanel {
 
@@ -27,6 +30,8 @@ public class MainMenuPanel extends JPanel {
     private int workDuration = 25;
     private int shortBreakDuration = 5;
     private int longBreakDuration = 15;
+    private JButton btnSetting;
+    private JButton btnHistory;
     
     // Tombol-tombol
     private ButtonDefault btnStart;
@@ -42,6 +47,7 @@ public class MainMenuPanel extends JPanel {
     // Sidebar 
     private final String PATH_ICON_SETTING = "assets/button/SettingButton.png";
     private final String PATH_ICON_HISTORY = "assets/button/HistoryButton.png";
+    private final String PATH_ICON_INFO = "assets/button/InfoButton.png";
     private final String PATH_ICON_MUSIC_ON = "assets/button/SongButton.png";
     private final String PATH_ICON_MUSIC_OFF = "assets/button/MuteButton.png";
     
@@ -67,18 +73,26 @@ public class MainMenuPanel extends JPanel {
         sidebar.setLayout(new BoxLayout(sidebar, BoxLayout.Y_AXIS));
         sidebar.setBorder(new EmptyBorder(30, 20, 0, 0));
 
-        JButton btnSetting = createImageButton(PATH_ICON_SETTING, 40);
+        btnSetting = createImageButton(PATH_ICON_SETTING, 40);
         btnSetting.addActionListener(e -> openSettingsPanel());
+        btnSetting.setToolTipText("Settings");
         sidebar.add(btnSetting);
         sidebar.add(Box.createVerticalStrut(20));
-        JButton btnHistory = createImageButton(PATH_ICON_HISTORY, 40);
+        btnHistory = createImageButton(PATH_ICON_HISTORY, 40);
         btnHistory.addActionListener(e -> openHistoryPanel());
+        btnHistory.setToolTipText("History");
         sidebar.add(btnHistory);
+        sidebar.add(Box.createVerticalStrut(20));
+        JButton btnInfo = createImageButton(PATH_ICON_INFO, 40);
+        btnInfo.addActionListener(e -> openInfoDialog());
+        btnInfo.setToolTipText("Info");
+        sidebar.add(btnInfo);
         sidebar.add(Box.createVerticalStrut(20));
         
         // Tombol Music (Toggle)
         btnMusic = createImageButton(AudioPlayer.getInstance().isMuted() ? PATH_ICON_MUSIC_OFF : PATH_ICON_MUSIC_ON, 40);
         btnMusic.addActionListener(e -> toggleMusic());
+        btnMusic.setToolTipText("Music");
         sidebar.add(btnMusic);
 
         add(sidebar, BorderLayout.WEST);
@@ -154,11 +168,13 @@ public class MainMenuPanel extends JPanel {
         // 1. Tombol Restart
         btnRestart = createImageButton(PATH_ICON_RESTART, 50); // Ukuran 50 biar seragam
         btnRestart.addActionListener(e -> handleRestart());
+        btnRestart.setToolTipText("Restart");
 
         // 2. Tombol Pause/Resume (Toggle)
         // Default awal icon Pause (asumsi timer langsung jalan)
         btnPauseResume = createImageButton(PATH_ICON_PAUSE, 50);
         btnPauseResume.addActionListener(e -> handlePauseResume());
+        btnPauseResume.setToolTipText("Pause / Resume");
 
         // 3. Tombol Start (ButtonDefault)
         btnStart = new ButtonDefault("start");
@@ -235,6 +251,91 @@ public class MainMenuPanel extends JPanel {
         parentFrame.revalidate();
         parentFrame.repaint();
     }
+
+    
+    private void openInfoDialog() {
+        if (parentFrame == null) return;
+
+        JDialog dialog = new JDialog(parentFrame, "Info", true);
+        dialog.setUndecorated(true);
+        dialog.setBackground(Theme.BACKGROUND_TRANSLUCENT);
+
+        JPanel container = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g;
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(new Color(30, 30, 30, 230));
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 20, 20);
+                g2.setColor(new Color(255, 255, 255, 180));
+                g2.setStroke(new BasicStroke(2f));
+                g2.drawRoundRect(1, 1, getWidth() - 3, getHeight() - 3, 18, 18);
+                super.paintComponent(g);
+            }
+        };
+        container.setOpaque(false);
+        container.setLayout(new BorderLayout());
+        container.setBorder(new EmptyBorder(18, 18, 18, 18));
+        container.setPreferredSize(new Dimension(540, 350));
+
+        JPanel header = new JPanel(new BorderLayout());
+        header.setOpaque(false);
+        JLabel title = new JLabel("How to Use Time2Focus");
+        title.setFont(Theme.FONT_BODYBOLD.deriveFont(18f));
+        title.setForeground(Color.WHITE);
+        JButton btnClose = new JButton("X");
+        btnClose.setFocusPainted(false);
+        btnClose.setBorderPainted(false);
+        btnClose.setContentAreaFilled(false);
+        btnClose.setForeground(Color.WHITE);
+        btnClose.addActionListener(e -> dialog.dispose());
+        header.add(title, BorderLayout.WEST);
+        header.add(btnClose, BorderLayout.EAST);
+
+        HTMLEditorKit kit = new HTMLEditorKit();
+        StyleSheet css = kit.getStyleSheet();
+        css.addRule("body { color: #ffffff; font-family: '" + Theme.FONT_BODY.getFamily() + "'; font-size: 14px; }");
+        css.addRule("b { color: #ffffff; }");
+        css.addRule("ul { margin: 0; padding-left: 18px; }");
+        css.addRule("li { margin-bottom: 10px; }");
+
+        JTextPane textPane = new JTextPane();
+        textPane.setEditable(false);
+        textPane.setOpaque(false);
+        textPane.setEditorKit(kit);
+        textPane.setContentType("text/html");
+        textPane.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
+        textPane.setMargin(new Insets(0, 0, 0, 0));
+        textPane.setText(
+            "<html><body style='margin:0; color:#ffffff; font-family:" + Theme.FONT_BODY.getFamily() + "; font-size:14px; line-height:1.4;'>"
+            + "<br><ul>"
+            + "<li>Press the <b>Start</b> button to begin your session. Once the session begins, you cannot access the <b>Settings</b> or <b>History</b> features.</li>"
+            + "<li>While the session is running, you can <b>pause</b>, <b>resume</b>, or <b>restart</b> the timer.</li>"
+            + "<li>Press the <b>Finish</b> button to end the session. Your session will be stored in the <b>History</b>.</li>"
+            + "<li>You can adjust the duration of each phase, change the background, and set the music from the <b>Settings</b> menu.</li>"
+            + "<li>To mute the music, press the <b>Music</b> button.</li>"
+            + "</ul>"
+            + "</body></html>"
+        );
+
+        JScrollPane scrollPane = new JScrollPane(textPane);
+        scrollPane.setOpaque(false);
+        scrollPane.getViewport().setOpaque(false);
+        scrollPane.setBorder(null);
+        scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+
+        container.add(header, BorderLayout.NORTH);
+        container.add(scrollPane, BorderLayout.CENTER);
+        dialog.setContentPane(container);
+        dialog.pack();
+        dialog.setLocationRelativeTo(parentFrame);
+        dialog.setVisible(true);
+    }
+
+
+
+
 
     private void showSessionInputDialog() {
         if (parentFrame == null) return;
@@ -388,6 +489,7 @@ public class MainMenuPanel extends JPanel {
         btnStart.setText("end");
         isSessionActive = true;
         isPaused = false;
+        setNavigationButtonsEnabled(false);
         
         // Pastikan icon Pause aktif (siap untuk di-pause)
         updateButtonIcon(btnPauseResume, PATH_ICON_PAUSE, 50);
@@ -403,11 +505,17 @@ public class MainMenuPanel extends JPanel {
         btnStart.setText("start");
         isSessionActive = false;
         isPaused = false;
+        setNavigationButtonsEnabled(true);
         
         lblSessionTitle.setText("session ended");
         
         // Reset icon pause ke default
         updateButtonIcon(btnPauseResume, PATH_ICON_PAUSE, 50);
+    }
+
+    private void setNavigationButtonsEnabled(boolean enabled) {
+        if (btnSetting != null) btnSetting.setEnabled(enabled);
+        if (btnHistory != null) btnHistory.setEnabled(enabled);
     }
 
     // --- UTILITIES UI ---
