@@ -6,14 +6,14 @@ import java.awt.event.MouseEvent;
 public class ButtonDefault extends JButton {
 
     private boolean isHovered = false; // State untuk melacak apakah mouse ada di atas tombol
-    private int cornerRadius = 50;     // Tingkat kelengkungan sudut
+    private int cornerRadius = 50;     
 
     public ButtonDefault(String text) {
         super(text);
         
         // 1. Setup Tampilan Dasar
         setFont(Theme.FONT_BUTTON);
-        setContentAreaFilled(false); // Matikan background bawaan Swing
+        setContentAreaFilled(false); 
         setFocusPainted(false);      // Matikan kotak fokus saat diklik
         setBorderPainted(false);     // Matikan border bawaan
         setOpaque(false);     // Transparan agar rounded corner terlihat
@@ -53,7 +53,6 @@ public class ButtonDefault extends JButton {
         Graphics2D g2 = (Graphics2D) g.create();
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        // Cek State: Apakah sedang di-hover?
         if (isHovered) {
             // --- TAMPILAN SAAT HOVER ---
             // Background Hitam Transparan
@@ -65,7 +64,6 @@ public class ButtonDefault extends JButton {
             g2.setStroke(new BasicStroke(2)); 
             g2.drawRoundRect(1, 1, getWidth()-3, getHeight()-3, cornerRadius, cornerRadius);
         } else {
-            // --- TAMPILAN NORMAL ---
             // Background Putih Solid
             g2.setColor(Theme.BTN_BG_NORMAL);
             g2.fillRoundRect(0, 0, getWidth(), getHeight(), cornerRadius, cornerRadius);
@@ -73,7 +71,7 @@ public class ButtonDefault extends JButton {
 
         g2.dispose();
         
-        // Panggil super untuk menggambar teks (tulisan "Start", "Login", dll)
+        // Panggil super untuk menggambar teks 
         super.paintComponent(g); 
     }
 }

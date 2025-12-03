@@ -166,12 +166,11 @@ public class MainMenuPanel extends JPanel {
         controlPanel.setOpaque(false);
 
         // 1. Tombol Restart
-        btnRestart = createImageButton(PATH_ICON_RESTART, 50); // Ukuran 50 biar seragam
+        btnRestart = createImageButton(PATH_ICON_RESTART, 50); 
         btnRestart.addActionListener(e -> handleRestart());
         btnRestart.setToolTipText("Restart");
 
         // 2. Tombol Pause/Resume (Toggle)
-        // Default awal icon Pause (asumsi timer langsung jalan)
         btnPauseResume = createImageButton(PATH_ICON_PAUSE, 50);
         btnPauseResume.addActionListener(e -> handlePauseResume());
         btnPauseResume.setToolTipText("Pause / Resume");
@@ -407,11 +406,19 @@ public class MainMenuPanel extends JPanel {
         txtSession.setAlignmentX(Component.CENTER_ALIGNMENT);
         ((AbstractDocument) txtSession.getDocument()).setDocumentFilter(new MaxLengthDocumentFilter(20));
         container.add(txtSession);
-        container.add(Box.createVerticalStrut(28));
+        container.add(Box.createVerticalStrut(6));
+
+        JLabel maxLabel = new JLabel("max 20 characters");
+        maxLabel.setFont(Theme.FONT_CAPTION.deriveFont(12f));
+        maxLabel.setForeground(new Color(200, 200, 200));
+        maxLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        container.add(maxLabel);
+
+        container.add(Box.createVerticalStrut(20));
 
         // Tombol save
         ButtonDefault btnSave = new ButtonDefault("save");
-        btnSave.setFont(Theme.FONT_BUTTON.deriveFont(14f));
+        btnSave.setFont(Theme.FONT_BUTTON.deriveFont(16f));
         btnSave.setPreferredSize(new Dimension(110, 42));
         btnSave.setMaximumSize(new Dimension(130, 42));
         
@@ -436,7 +443,7 @@ public class MainMenuPanel extends JPanel {
     
     // Toggle Pause/Resume
     private void handlePauseResume() {
-        if (!isSessionActive || controller == null) return; // Tombol tidak aktif jika sesi belum mulai
+        if (!isSessionActive || controller == null) return; 
 
         isPaused = !isPaused;
 
@@ -509,7 +516,6 @@ public class MainMenuPanel extends JPanel {
         
         lblSessionTitle.setText("session ended");
         
-        // Reset icon pause ke default
         updateButtonIcon(btnPauseResume, PATH_ICON_PAUSE, 50);
     }
 
@@ -520,7 +526,6 @@ public class MainMenuPanel extends JPanel {
 
     // --- UTILITIES UI ---
     
-    // Helper untuk membuat Image Button baru
     private JButton createImageButton(String path, int size) {
         ImageIcon icon = new ImageIcon(path);
         Image img = icon.getImage().getScaledInstance(size, size, Image.SCALE_SMOOTH);
@@ -530,12 +535,10 @@ public class MainMenuPanel extends JPanel {
         btn.setBorderPainted(false);
         btn.setFocusPainted(false);
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        // Hilangkan margin agar pas dengan gambar
         btn.setMargin(new Insets(0,0,0,0)); 
         return btn;
     }
 
-    // Helper untuk mengubah Icon pada button yg sudah ada (Toggle logic)
     private void updateButtonIcon(JButton btn, String path, int size) {
         ImageIcon icon = new ImageIcon(path);
         Image img = icon.getImage().getScaledInstance(size, size, Image.SCALE_SMOOTH);
@@ -617,7 +620,6 @@ public class MainMenuPanel extends JPanel {
         updateButtonIcon(btnPauseResume, paused ? PATH_ICON_RESUME : PATH_ICON_PAUSE, 50);
     }
 
-    // misal labelnya bernama timerLabel dan phaseLabel:
     public void updateTimerLabel(String timeText) {
         lblTimer.setText(timeText);
     }
@@ -630,7 +632,6 @@ public class MainMenuPanel extends JPanel {
         lblCounter.setText("total work(s) finished: " + count);
     }
 
-    /** Simple document filter to limit text length for session input. */
     private static class MaxLengthDocumentFilter extends DocumentFilter {
         private final int max;
         MaxLengthDocumentFilter(int max) {

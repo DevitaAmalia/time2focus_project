@@ -21,26 +21,25 @@ public abstract class PomodoroPhase {
 
     // ================== Method Umum ==================
 
-    /** Mulai fase (dipanggil saat user klik Start di awal). */
+    // Mulai fase
     public void start() {
         if (!finished) {
             this.running = true;
         }
     }
 
-    /** Pause fase (dipanggil saat user klik Pause). */
+    // Pause fase 
     public void pause() {
         this.running = false;
     }
 
-    /** Lanjutkan fase setelah pause. */
     public void resume() {
         if (!finished) {
             this.running = true;
         }
     }
 
-    /** Reset kembali ke awal durasi. */
+    // Reset kembali ke awal durasi
     public void reset() {
         this.running = false;
         this.finished = false;

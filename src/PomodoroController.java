@@ -12,6 +12,7 @@ public class PomodoroController {
     private int workDurationSec;
     private int shortBreakDurationSec;
     private int longBreakDurationSec;
+    private int longBreakCycle;
 
     // ================== State sesi ==================
     private PomodoroPhase currentPhase;
@@ -53,17 +54,19 @@ public class PomodoroController {
         // ambil setting dari DB
         var settings = db.getUserSettings(userId);
 
-        // fallback default kalau null
         int workMin  = settings.getOrDefault("work_duration", 25) instanceof Integer
                 ? (Integer) settings.get("work_duration") : 25;
         int sbMin    = settings.getOrDefault("sb_duration", 5) instanceof Integer
                 ? (Integer) settings.get("sb_duration") : 5;
         int lbMin    = settings.getOrDefault("lb_duration", 15) instanceof Integer
                 ? (Integer) settings.get("lb_duration") : 15;
+        int cycleCfg = settings.getOrDefault("cycle", 4) instanceof Integer
+                ? (Integer) settings.get("cycle") : 4;
 
         this.workDurationSec       = workMin * 60;
         this.shortBreakDurationSec = sbMin * 60;
         this.longBreakDurationSec  = lbMin * 60;
+        this.longBreakCycle        = (cycleCfg > 0) ? cycleCfg : 4;
     }
 
     // ================== Kontrol Sesi dari UI ==================
@@ -98,21 +101,18 @@ public class PomodoroController {
         startTimerThreadIfNeeded();
     }
 
-    /** Tombol Pause di UI. */
     public void pauseCurrentPhase() {
         if (currentPhase != null && sessionActive) {
             currentPhase.pause();
         }
     }
 
-    /** Tombol Resume di UI. */
     public void resumeCurrentPhase() {
         if (currentPhase != null && sessionActive) {
             currentPhase.resume();
         }
     }
 
-    /** Tombol Reset di UI: reset hanya phase saat ini. */
     public void resetCurrentPhase() {
         if (currentPhase != null && sessionActive) {
             currentPhase.reset();
@@ -120,10 +120,6 @@ public class PomodoroController {
         }
     }
 
-    /**
-     * Tombol End Session di UI:
-     * Sesi dianggap selesai, akumulasi waktu saat ini, lalu simpan ke DB.
-     */
     public void endSession() {
         if (!sessionActive) {
             return;
@@ -195,7 +191,7 @@ public class PomodoroController {
                 if (currentPhase.isFinished() && !phaseCompletionHandled) {
                     phaseCompletionHandled = true;
 
-                    // Jalankan onPhaseFinished di EDT (karena ada dialog / update UI)
+                    // Jalankan onPhaseFinished di EDT 
                     SwingUtilities.invokeLater(() -> {
                         currentPhase.onPhaseFinished(this);
                     });
@@ -206,8 +202,6 @@ public class PomodoroController {
         timerThread.setDaemon(true);
         timerThread.start();
     }
-
-    // ================== Internal: Helper ==================
 
     private void switchToNewPhase(PomodoroPhase newPhase) {
         this.currentPhase = newPhase;
@@ -227,7 +221,7 @@ public class PomodoroController {
         view.setPauseState(true);
     }
 
-    /** Update label fase & timer di panel. Sesuaikan dengan method yang ada di MainMenuPanel-mu. */
+    // Update label fase & timer di panel
     private void updateViewPhaseAndTime(PomodoroPhase phase) {
         if (phase == null) {
             view.updatePhaseLabel("-");
@@ -238,7 +232,7 @@ public class PomodoroController {
         }
     }
 
-    /** Tambahkan elapsedSeconds fase ke akumulasi total untuk history. */
+    // Tambahkan elapsedSeconds fase ke akumulasi total untuk history. 
     private void accumulatePhaseElapsed(PomodoroPhase phase) {
         int elapsed = phase.getElapsedSeconds();
         String name = phase.getPhaseName();
@@ -254,22 +248,17 @@ public class PomodoroController {
                 totalLongSeconds += elapsed;
                 break;
             default:
-                // do nothing
                 break;
         }
     }
 
-    // ================== Dipanggil dari Phase ==================
-    // Metode ini di-trigger oleh onPhaseFinished(...) di masing-masing subclass.
-
-    /** WorkPhase sudah selesai. */
+    //WorkPhase sudah selesai.
     public void handleWorkPhaseFinished(WorkPhase phase) {
         if (!sessionActive) return;
 
         // tambahkan waktu fase ini
         accumulatePhaseElapsed(phase);
 
-        // cycle++ sesuai permintaanmu
         cycleCount++;
         workCompletedCount++;
         view.updateWorkCounter(workCompletedCount);
@@ -289,13 +278,13 @@ public class PomodoroController {
         }
     }
 
-    /** ShortBreakPhase sudah selesai. */
+    //ShortBreakPhase sudah selesai.
     public void handleShortBreakPhaseFinished(ShortBreakPhase phase) {
         if (!sessionActive) return;
 
         accumulatePhaseElapsed(phase);
 
-        if (cycleCount < 4) {
+        if (cycleCount < longBreakCycle) {
             int result = JOptionPane.showConfirmDialog(
                 view,
                 "Short break ended, continue to next work phase?",
@@ -310,7 +299,7 @@ public class PomodoroController {
                 preparePausedPhase(new WorkPhase(workDurationSec));
             }
         } else {
-            // cycle == 4 → Long Break
+            // Sudah mencapai jumlah cycle untuk long break
             int result = JOptionPane.showConfirmDialog(
                 view,
                 "Short break ended, continue to long break phase?",
@@ -333,7 +322,7 @@ public class PomodoroController {
 
         accumulatePhaseElapsed(phase);
 
-        // reset cycle ke 0 sesuai permintaanmu
+        // reset cycle ke 0 
         cycleCount = 0;
 
         int result = JOptionPane.showConfirmDialog(
@@ -365,4 +354,3 @@ public class PomodoroController {
         return sessionName;
     }
 }
-

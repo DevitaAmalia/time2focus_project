@@ -49,7 +49,6 @@ public class LoginPanel extends JPanel {
     private void initComponents() {
         setLayout(null);
         
-        // Create semi-transparent container panel for form
         formContainer = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
@@ -248,7 +247,7 @@ public class LoginPanel extends JPanel {
 
         // 3. Ganti isi frame menjadi mainMenu
         parentFrame.getContentPane().removeAll();
-        parentFrame.setContentPane(mainMenu);   // boleh juga parentFrame.add(mainMenu);
+        parentFrame.setContentPane(mainMenu);   
         parentFrame.revalidate();
         parentFrame.repaint();
     }

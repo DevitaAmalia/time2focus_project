@@ -26,28 +26,24 @@ public class Theme {
     public static final Color BTN_FG_HOVER = Color.WHITE;
     public static final Color BTN_BORDER_HOVER = Color.WHITE;
 
-    // --- 3. CONFIG PROGRESS BAR ---
-    public static final Color PROGRESS_BAR_FG = Color.WHITE;
-    public static final Color PROGRESS_BAR_BG = new Color(255, 255, 255, 30); // Putih pudar
-
-    // --- 4. FONT HANDLING ---
+    // --- 3. FONT HANDLING ---
     public static final String FONT_NAME = "Space Grotesk";
     
     // Deklarasi Font 
-    public static Font FONT_TIMER_BIG;    // Pakai Bold
-    public static Font FONT_TITLE;        // Pakai Bold
-    public static Font FONT_SUBHEADER;    // Pakai Bold
-    public static Font FONT_BODY;         // Pakai Medium
-    public static Font FONT_BUTTON;       // Pakai Medium
-    public static Font FONT_CAPTION;      // Pakai Regular 
+    public static Font FONT_TIMER_BIG;    
+    public static Font FONT_TITLE;        
+    public static Font FONT_SUBHEADER;   
+    public static Font FONT_BODY;         
+    public static Font FONT_BUTTON;       
+    public static Font FONT_CAPTION;       
     public static Font FONT_BODYBOLD;
 
-    // --- 5. STYLES (SimpleAttributeSet) ---
+    // --- 4. STYLES (SimpleAttributeSet) ---
     public static final SimpleAttributeSet STYLE_DEFAULT = new SimpleAttributeSet();
     public static final SimpleAttributeSet STYLE_WORK = new SimpleAttributeSet();
     public static final SimpleAttributeSet STYLE_BREAK = new SimpleAttributeSet();
 
-    // --- 6. STATIC INITIALIZATION (Setup Font & Styles) ---
+    // --- 5. STATIC INITIALIZATION (Setup Font & Styles) ---
     static {
         try {
             GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
@@ -80,7 +76,7 @@ public class Theme {
             // 3. Teks biasa, Button untuk tombol putih, body untuk tulisan selain title, isi history
             if (baseMedium != null) {
                 FONT_BUTTON    = baseMedium.deriveFont(27f);
-                FONT_BODY      = baseMedium.deriveFont(16f);
+                FONT_BODY      = baseMedium.deriveFont(14f);
             }
 
             StyleConstants.setForeground(STYLE_DEFAULT, TEXT_WHITE);

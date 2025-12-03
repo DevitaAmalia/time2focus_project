@@ -307,7 +307,7 @@ class KoneksiDatabase {
         Map<String, Object> map = new HashMap<>();
 
         String sql = "SELECT s.work_duration, s.sb_duration, s.lb_duration, " +
-                "       s.id_bg, s.id_music, " +
+                "       s.id_bg, s.id_music, s.cycle, " +
                 "       b.path_bg, m.path_music " +
                 "FROM settings s " +
                 "LEFT JOIN backgrounds b ON s.id_bg = b.id_bg " +
@@ -326,6 +326,7 @@ class KoneksiDatabase {
                     map.put("lb_duration", rs.getInt("lb_duration"));
                     map.put("id_bg", rs.getInt("id_bg"));
                     map.put("id_music", rs.getInt("id_music"));
+                    map.put("cycle", rs.getInt("cycle"));
                     map.put("path_bg", rs.getString("path_bg"));
                     map.put("path_music", rs.getString("path_music"));
                 }
@@ -341,11 +342,11 @@ class KoneksiDatabase {
     // ================= Update Setting User =================
     public boolean updateUserSettings(int userId,
             int workDur, int sbDur, int lbDur,
-            int idBg, int idMusic) {
+            int idBg, int idMusic, int cycleCount) {
 
         String sql = "UPDATE settings SET " +
                 "work_duration=?, sb_duration=?, lb_duration=?, " +
-                "id_bg=?, id_music=? " +
+                "id_bg=?, id_music=?, cycle=? " +
                 "WHERE id_user=?";
 
         try (Connection conn = getConnection();
@@ -356,7 +357,8 @@ class KoneksiDatabase {
             pstmt.setInt(3, lbDur);
             pstmt.setInt(4, idBg);
             pstmt.setInt(5, idMusic);
-            pstmt.setInt(6, userId);
+            pstmt.setInt(6, cycleCount);
+            pstmt.setInt(7, userId);
 
             return pstmt.executeUpdate() > 0;
 

@@ -25,6 +25,7 @@ public class SettingsPanel extends JPanel {
     private int currentLbDuration = 15;
     private int currentBgId = 1;
     private int currentMusicId = 1;
+    private int currentCycle = 4;
     
     public SettingsPanel(int userId, KoneksiDatabase db, JFrame parentFrame) {
         this.userId = userId;
@@ -43,6 +44,7 @@ public class SettingsPanel extends JPanel {
             currentLbDuration = (Integer) settings.getOrDefault("lb_duration", 15);
             currentBgId = (Integer) settings.getOrDefault("id_bg", 1);
             currentMusicId = (Integer) settings.getOrDefault("id_music", 1);
+            currentCycle = (Integer) settings.getOrDefault("cycle", 4);
             String bgPath = (String) settings.get("path_bg");
             if (bgPath != null) backgroundImage = new ImageIcon(bgPath).getImage();
         }
@@ -130,7 +132,7 @@ public class SettingsPanel extends JPanel {
         gbc.gridy = 1;
         gbc.insets = new Insets(0, 0, 20, 0);
         JLabel subtitle = new JLabel("let's set up the timer to your liking");
-        subtitle.setFont(Theme.FONT_BODY.deriveFont(14f));
+        subtitle.setFont(Theme.FONT_BODY);
         subtitle.setForeground(new Color(200, 200, 200));
         container.add(subtitle, gbc);
         
@@ -154,7 +156,7 @@ public class SettingsPanel extends JPanel {
         gbc.anchor = GridBagConstraints.CENTER;
         ButtonDefault btnSave = new ButtonDefault("save");
         btnSave.setPreferredSize(new Dimension(120, 42));
-        btnSave.setFont(Theme.FONT_BUTTON.deriveFont(18f));
+        btnSave.setFont(Theme.FONT_BUTTON);
         btnSave.addActionListener(e -> handleSave());
         container.add(btnSave, gbc);
         
@@ -276,14 +278,25 @@ public class SettingsPanel extends JPanel {
         label.setForeground(Color.WHITE);
         panel.add(label);
         
-        cycleField = new JTextField("4");
+        cycleField = new JTextField(String.valueOf(currentCycle));
         cycleField.setPreferredSize(new Dimension(55, 30));
         cycleField.setFont(Theme.FONT_BODY.deriveFont(14f));
         cycleField.setHorizontalAlignment(JTextField.CENTER);
         cycleField.setForeground(Color.WHITE);
         cycleField.setOpaque(false);
         cycleField.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(255, 255, 255, 80), 1),
+            new javax.swing.border.AbstractBorder() {
+                private final int arc = 16;
+                @Override
+                public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
+                    Graphics2D g2 = (Graphics2D) g.create();
+                    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                    g2.setColor(new Color(255, 255, 255, 80));
+                    g2.setStroke(new BasicStroke(2f));
+                    g2.drawRoundRect(x, y, width - 1, height - 1, arc, arc);
+                    g2.dispose();
+                }
+            },
             BorderFactory.createEmptyBorder(5, 10, 5, 10)
         ));
         cycleField.setCaretColor(Color.WHITE);
@@ -348,30 +361,19 @@ public class SettingsPanel extends JPanel {
         combo.setUI(new BasicComboBoxUI() {
             @Override
             protected JButton createArrowButton() {
-                JButton arrow = new JButton() {
+                return new JButton() {
+                    @Override
+                    public Dimension getPreferredSize() {
+                        return new Dimension(0, 0);
+                    }
+                    @Override
+                    public void setBounds(int x, int y, int width, int height) {
+                        super.setBounds(x, y, 0, 0);
+                    }
                     @Override
                     public void paintComponent(Graphics g) {
-                        Graphics2D g2 = (Graphics2D) g;
-                        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                        g2.setColor(Theme.BACKGROUND_TRANSLUCENT);
-                        g2.fillRect(0, 0, getWidth(), getHeight());
-                        g2.setColor(Color.WHITE);
-                        int w = getWidth(), h = getHeight();
-                        int[] x = {w/2 - 4, w/2 + 4, w/2};
-                        int[] y = {h/2 - 2, h/2 - 2, h/2 + 3};
-                        g2.fillPolygon(x, y, 3);
                     }
                 };
-                arrow.setOpaque(false);
-                arrow.setContentAreaFilled(false);
-                arrow.setBorderPainted(false);
-                arrow.setFocusPainted(false);
-                arrow.setCursor(new Cursor(Cursor.HAND_CURSOR));
-                arrow.addActionListener(e -> {
-                    if (comboBox.isPopupVisible()) comboBox.hidePopup();
-                    else comboBox.showPopup();
-                });
-                return arrow;
             }
             
             @Override
@@ -389,12 +391,8 @@ public class SettingsPanel extends JPanel {
         combo.setBackground(Theme.BACKGROUND_TRANSLUCENT);
         combo.setFocusable(false);
         combo.setMaximumRowCount(6);
+        combo.setCursor(new Cursor(Cursor.HAND_CURSOR));
         
-        combo.addMouseListener(new MouseAdapter() {
-            public void mousePressed(MouseEvent e) { e.consume(); }
-            public void mouseClicked(MouseEvent e) { e.consume(); }
-            public void mouseReleased(MouseEvent e) { e.consume(); }
-        });
         
         combo.addItemListener(e -> {
             if (e.getStateChange() == ItemEvent.SELECTED) combo.hidePopup();
@@ -408,16 +406,12 @@ public class SettingsPanel extends JPanel {
                 label.setOpaque(true);
                 label.setBorder(BorderFactory.createEmptyBorder(8, 12, 8, 12));
                 label.setFont(Theme.FONT_BODY.deriveFont(14f));
-                
-                if (isSelected) {
-                    label.setBackground(new Color(60, 60, 60, 220));
-                } else {
-                    label.setBackground(new Color(60, 60, 60, 220));
-                }
+                Color cellBg = new Color(60, 60, 60, 220);
+                label.setBackground(cellBg);
                 label.setForeground(Color.WHITE);
-                
+
                 list.setBackground(new Color(40, 40, 40, 220));
-                list.setSelectionBackground(new Color(60, 60, 60, 220));
+                list.setSelectionBackground(cellBg);
                 list.setSelectionForeground(Color.WHITE);
                 
                 return label;
@@ -484,9 +478,16 @@ public class SettingsPanel extends JPanel {
             int workDur = Integer.parseInt(workField.getText().trim());
             int sbDur = Integer.parseInt(sbField.getText().trim());
             int lbDur = Integer.parseInt(lbField.getText().trim());
+            int cycle = Integer.parseInt(cycleField.getText().trim());
             
             if (workDur < 1 || workDur > 120 || sbDur < 1 || sbDur > 120 || lbDur < 1 || lbDur > 120) {
                 JOptionPane.showMessageDialog(this, "Duration must be between 1 and 120 minutes.", 
+                    "Validation Error", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            if (cycle < 1 || cycle > 12) {
+                JOptionPane.showMessageDialog(this, "Cycle must be between 1 and 12.", 
                     "Validation Error", JOptionPane.WARNING_MESSAGE);
                 return;
             }
@@ -500,13 +501,12 @@ public class SettingsPanel extends JPanel {
                 return;
             }
             
-            if (db.updateUserSettings(userId, workDur, sbDur, lbDur, bg.id, music.id)) {
+            if (db.updateUserSettings(userId, workDur, sbDur, lbDur, bg.id, music.id, cycle)) {
                 backgroundImage = new ImageIcon(bg.path).getImage();
                 repaint();
                 AudioPlayer.getInstance().stop();
                 AudioPlayer.getInstance().play(music.path);
                 JOptionPane.showMessageDialog(this, "Settings saved successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
-                returnToMainMenu();
             } else {
                 JOptionPane.showMessageDialog(this, "Failed to save settings. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
             }

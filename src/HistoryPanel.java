@@ -72,25 +72,26 @@ public class HistoryPanel extends JPanel {
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g;
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(Theme.BACKGROUND_TRANSLUCENT); // Hitam Transparan
+                g2.setColor(new Color(0, 0, 0, 180));
                 g2.fillRoundRect(0, 0, getWidth(), getHeight(), 40, 40);
-                
-                // Garis tepi tipis (opsional)
-                g2.setColor(new Color(255, 255, 255, 30));
-                g2.drawRoundRect(0, 0, getWidth()-1, getHeight()-1, 40, 40);
-                
+
+                // Border putih seperti container Settings
+                g2.setColor(Color.WHITE);
+                g2.setStroke(new BasicStroke(2f));
+                g2.drawRoundRect(1, 1, getWidth() - 2, getHeight() - 2, 40, 40);
+
                 super.paintComponent(g);
             }
         };
         tableContainer.setOpaque(false);
-        // Padding di dalam kotak hitam: Top, Left, Bottom, Right
         tableContainer.setBorder(new EmptyBorder(30, 30, 30, 30)); 
-        tableContainer.setPreferredSize(new Dimension(850, 500));
+        tableContainer.setPreferredSize(new Dimension(540, 500));
+        tableContainer.setMinimumSize(new Dimension(540, 500));
+        tableContainer.setMaximumSize(new Dimension(540, 500));
 
         // --- A. HEADER TEXT (Di dalam container) ---
         JPanel headerPanel = new JPanel(new GridLayout(2, 1));
         headerPanel.setOpaque(false);
-        // Beri jarak antara teks header dengan tabel di bawahnya
         headerPanel.setBorder(new EmptyBorder(0, 0, 20, 0)); 
         
         JLabel lblHello = new JLabel("hello, " + username);
@@ -98,37 +99,33 @@ public class HistoryPanel extends JPanel {
         lblHello.setForeground(Theme.TEXT_WHITE);
         
         JLabel lblSub = new JLabel("let’s look to what you had done");
-        lblSub.setFont(Theme.FONT_BODY.deriveFont(16f));
+        lblSub.setFont(Theme.FONT_BODY);
         lblSub.setForeground(new Color(220, 220, 220)); 
         
         headerPanel.add(lblHello);
         headerPanel.add(lblSub);
         
-        // Masukkan Header ke Bagian ATAS (NORTH) dari Container Hitam
         tableContainer.add(headerPanel, BorderLayout.NORTH);
 
         // --- B. CUSTOM TABLE (Di dalam container) ---
         createCustomTable();
         
-        // ScrollPane Transparan
         JScrollPane scrollPane = new JScrollPane(historyTable);
         scrollPane.setOpaque(false);
         scrollPane.setBackground(Theme.BACKGROUND_TRANSLUCENT);
-        scrollPane.getViewport().setOpaque(true);
+        scrollPane.getViewport().setOpaque(false);
         scrollPane.setBorder(null);
-        scrollPane.getViewport().setBackground(Theme.BACKGROUND_TRANSLUCENT);
+        scrollPane.getViewport().setBackground(new Color(0, 0, 0, 0));
         scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
         scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         
-        // Masukkan Tabel ke Bagian TENGAH (CENTER) dari Container Hitam
         tableContainer.add(scrollPane, BorderLayout.CENTER);
 
         centerPanel.add(tableContainer, gbc);
 
-        // Wrapper agar container tidak mepet layar kanan/bawah
         JPanel wrapper = new JPanel(new BorderLayout());
         wrapper.setOpaque(false);
-        wrapper.setBorder(new EmptyBorder(20, 20, 40, 40)); 
+        wrapper.setBorder(new EmptyBorder(30, 20, 40, 40)); 
         wrapper.add(centerPanel, BorderLayout.CENTER);
 
         add(wrapper, BorderLayout.CENTER);
@@ -164,38 +161,36 @@ public class HistoryPanel extends JPanel {
         historyTable = new JTable(tableModel);
         
         // 1. Styling Dasar Tabel
-        historyTable.setOpaque(true);
-        historyTable.setBackground(Theme.BACKGROUND_TRANSLUCENT); // Transparan total
+        historyTable.setOpaque(false);
+        historyTable.setBackground(Theme.BACKGROUND_TRANSLUCENT);
         historyTable.setForeground(Theme.TEXT_WHITE);
-        historyTable.setFont(Theme.FONT_BODY.deriveFont(14f));
-        historyTable.setRowHeight(65); 
+        historyTable.setFont(Theme.FONT_BODY.deriveFont(12f));
+        historyTable.setRowHeight(46); 
         historyTable.setShowGrid(false); 
         historyTable.setIntercellSpacing(new Dimension(0, 0));
         historyTable.setFillsViewportHeight(true);
-        
-        // Selection Style
-        historyTable.setSelectionBackground(new Color(255, 255, 255, 30));
-        historyTable.setSelectionForeground(Theme.TEXT_WHITE);
+        historyTable.setRowSelectionAllowed(false);
+        historyTable.setColumnSelectionAllowed(false);
+        historyTable.setCellSelectionEnabled(false);
+        historyTable.setFocusable(false);
         
         // 2. Styling Header 
         JTableHeader header = historyTable.getTableHeader();
         header.setOpaque(true); 
-        header.setBackground(Theme.BACKGROUND_TRANSLUCENT); // Samakan dengan table
+        header.setBackground(Theme.BACKGROUND_TRANSLUCENT); 
         header.setForeground(Theme.TEXT_WHITE);
-        header.setFont(Theme.FONT_BUTTON.deriveFont(Font.BOLD, 14f));
-        header.setPreferredSize(new Dimension(0, 60));
+        header.setFont(Theme.FONT_BODYBOLD.deriveFont(14f));
+        header.setPreferredSize(new Dimension(0, 40));
         
-        // Renderer Header (Memaksa transparan saat digambar)
         header.setDefaultRenderer(new TransparentHeaderRenderer());
         
-        // Renderer Isi Tabel
         historyTable.setDefaultRenderer(Object.class, new TransparentCellRenderer());
         
         // Lebar Kolom
-        historyTable.getColumnModel().getColumn(0).setPreferredWidth(300);
-        historyTable.getColumnModel().getColumn(1).setPreferredWidth(140);
-        historyTable.getColumnModel().getColumn(2).setPreferredWidth(140);
-        historyTable.getColumnModel().getColumn(3).setPreferredWidth(140);
+        historyTable.getColumnModel().getColumn(0).setPreferredWidth(180);
+        historyTable.getColumnModel().getColumn(1).setPreferredWidth(90);
+        historyTable.getColumnModel().getColumn(2).setPreferredWidth(90);
+        historyTable.getColumnModel().getColumn(3).setPreferredWidth(90);
     }
 
     // --- LOAD DATA ---
@@ -231,8 +226,8 @@ public class HistoryPanel extends JPanel {
 
             String dateStr = (date != null) ? dateFormat.format(date) : "-";
             String formattedSession = "<html><div style='padding-left:10px;'>" +
-                                      "<b style='font-size:14px'>" + sessionName + "</b><br>" +
-                                      "<span style='color:#cccccc; font-size:11px'>" + dateStr + "</span>" +
+                                      "<b style='font-size:11px'>" + sessionName + "</b><br>" +
+                                      "<span style='color:#cccccc; font-size:9px'>" + dateStr + "</span>" +
                                       "</div></html>";
 
             tableModel.addRow(new Object[]{formattedSession, work, sb, lb});
@@ -243,7 +238,6 @@ public class HistoryPanel extends JPanel {
     class TransparentHeaderRenderer extends DefaultTableCellRenderer {
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-            // Gunakan JLabel biasa, jangan super.getTableCell... karena sering membawa style default L&F
             JLabel l = new JLabel();
             l.setText(value.toString());
             l.setOpaque(true);
@@ -265,24 +259,17 @@ public class HistoryPanel extends JPanel {
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
             JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
             
-            l.setOpaque(false); // Pastikan false
+            l.setOpaque(true);
             l.setForeground(Theme.TEXT_WHITE);
             
             if (column == 0) {
                 l.setHorizontalAlignment(JLabel.LEFT);
             } else {
                 l.setHorizontalAlignment(JLabel.CENTER);
-                l.setFont(Theme.FONT_BODY.deriveFont(16f)); 
+                l.setFont(Theme.FONT_BODY.deriveFont(13f)); 
             }
             
-            // Efek hover/selection
-            if (isSelected) {
-                l.setOpaque(true);
-                l.setBackground(new Color(255, 255, 255, 30));
-            } else {
-                l.setBackground(new Color(0,0,0,0));
-            }
-            
+            l.setBackground(Theme.BACKGROUND_TRANSLUCENT);
             return l;
         }
     }
