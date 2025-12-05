@@ -147,9 +147,7 @@ public class HistoryPanel extends JPanel {
 
     // --- SETUP TABLE ---
     private void createCustomTable() {
-        String[] columns = {"session", "<html><center>work<br>(minutes)</center></html>", 
-                            "<html><center>short break<br>(minutes)</center></html>", 
-                            "<html><center>long break<br>(minutes)</center></html>"};
+        String[] columns = {"session", "work", "short break", "long break"};
         
         tableModel = new DefaultTableModel(columns, 0) {
             @Override
@@ -165,7 +163,7 @@ public class HistoryPanel extends JPanel {
         historyTable.setBackground(Color.BLACK);
         historyTable.setForeground(Theme.TEXT_WHITE);
         historyTable.setFont(Theme.FONT_BODY.deriveFont(12f));
-        historyTable.setRowHeight(46); 
+        historyTable.setRowHeight(54); 
         historyTable.setShowGrid(false); 
         historyTable.setIntercellSpacing(new Dimension(0, 0));
         historyTable.setFillsViewportHeight(true);
@@ -196,6 +194,7 @@ public class HistoryPanel extends JPanel {
             }
         });
         
+        historyTable.getColumnModel().getColumn(0).setCellRenderer(new SessionCellRenderer());
         historyTable.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
@@ -203,12 +202,8 @@ public class HistoryPanel extends JPanel {
                 l.setOpaque(true);
                 l.setBackground(Color.BLACK);
                 l.setForeground(Theme.TEXT_WHITE);
-                if (column == 0) {
-                    l.setHorizontalAlignment(JLabel.LEFT);
-                } else {
-                    l.setHorizontalAlignment(JLabel.CENTER);
-                    l.setFont(Theme.FONT_BODY.deriveFont(13f)); 
-                }
+                l.setHorizontalAlignment(JLabel.CENTER);
+                l.setFont(Theme.FONT_BODY.deriveFont(13f)); 
                 return l;
             }
         });
@@ -252,12 +247,51 @@ public class HistoryPanel extends JPanel {
             Timestamp date = (Timestamp) row[4];
 
             String dateStr = (date != null) ? dateFormat.format(date) : "-";
-            String formattedSession = "<html><div style='padding-left:10px;'>" +
-                                      "<b style='font-size:11px'>" + sessionName + "</b><br>" +
-                                      "<span style='color:#cccccc; font-size:9px'>" + dateStr + "</span>" +
-                                      "</div></html>";
+            SessionCell cell = new SessionCell(sessionName, dateStr);
+            tableModel.addRow(new Object[]{cell, work, sb, lb});
+        }
+    }
 
-            tableModel.addRow(new Object[]{formattedSession, work, sb, lb});
+    /** Data holder untuk kolom sesi (nama + tanggal). */
+    private static class SessionCell {
+        final String sessionName;
+        final String dateText;
+        SessionCell(String sessionName, String dateText) {
+            this.sessionName = sessionName;
+            this.dateText = dateText;
+        }
+    }
+
+    /** Renderer Swing murni (tanpa HTML) untuk kolom pertama. */
+    private static class SessionCellRenderer implements TableCellRenderer {
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            JPanel panel = new JPanel();
+            panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+            panel.setOpaque(true);
+            panel.setBackground(Color.BLACK);
+            panel.setBorder(new EmptyBorder(4, 10, 4, 4));
+
+            JLabel nameLabel = new JLabel();
+            nameLabel.setForeground(Theme.TEXT_WHITE);
+            nameLabel.setFont(Theme.FONT_BODYBOLD.deriveFont(13f));
+
+            JLabel dateLabel = new JLabel();
+            dateLabel.setForeground(new Color(200, 200, 200));
+            dateLabel.setFont(Theme.FONT_CAPTION.deriveFont(10f));
+
+            if (value instanceof SessionCell) {
+                SessionCell cell = (SessionCell) value;
+                nameLabel.setText(cell.sessionName);
+                dateLabel.setText(cell.dateText);
+            } else if (value != null) {
+                nameLabel.setText(value.toString());
+                dateLabel.setText("");
+            }
+
+            panel.add(nameLabel);
+            panel.add(dateLabel);
+            return panel;
         }
     }
 

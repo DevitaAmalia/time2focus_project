@@ -2,11 +2,11 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.util.Map;
-import javax.swing.text.AbstractDocument;
-import javax.swing.text.DocumentFilter;
 import javax.swing.JEditorPane;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.StyleSheet;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 
 public class MainMenuPanel extends JPanel {
 
@@ -404,7 +404,16 @@ public class MainMenuPanel extends JPanel {
         txtSession.setSelectedTextColor(Color.WHITE);
         txtSession.setMaximumSize(new Dimension(400, 46));
         txtSession.setAlignmentX(Component.CENTER_ALIGNMENT);
-        ((AbstractDocument) txtSession.getDocument()).setDocumentFilter(new MaxLengthDocumentFilter(20));
+        txtSession.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                String text = txtSession.getText();
+                int selLen = Math.max(0, txtSession.getSelectionEnd() - txtSession.getSelectionStart());
+                if (text.length() - selLen >= 20) {
+                    e.consume();
+                }
+            }
+        });
         container.add(txtSession);
         container.add(Box.createVerticalStrut(6));
 
@@ -632,25 +641,4 @@ public class MainMenuPanel extends JPanel {
         lblCounter.setText("total work(s) finished: " + count);
     }
 
-    private static class MaxLengthDocumentFilter extends DocumentFilter {
-        private final int max;
-        MaxLengthDocumentFilter(int max) {
-            this.max = max;
-        }
-        @Override
-        public void insertString(FilterBypass fb, int offset, String string, javax.swing.text.AttributeSet attr) throws javax.swing.text.BadLocationException {
-            if (string == null) return;
-            if (fb.getDocument().getLength() + string.length() <= max) {
-                super.insertString(fb, offset, string, attr);
-            }
-        }
-        @Override
-        public void replace(FilterBypass fb, int offset, int length, String text, javax.swing.text.AttributeSet attrs) throws javax.swing.text.BadLocationException {
-            if (text == null) return;
-            int newLength = fb.getDocument().getLength() - length + text.length();
-            if (newLength <= max) {
-                super.replace(fb, offset, length, text, attrs);
-            }
-        }
-    }
 }
