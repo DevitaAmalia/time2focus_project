@@ -72,7 +72,7 @@ public class HistoryPanel extends JPanel {
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g;
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(new Color(0, 0, 0, 180));
+                g2.setColor(Color.BLACK);
                 g2.fillRoundRect(0, 0, getWidth(), getHeight(), 40, 40);
 
                 // Border putih seperti container Settings
@@ -111,11 +111,11 @@ public class HistoryPanel extends JPanel {
         createCustomTable();
         
         JScrollPane scrollPane = new JScrollPane(historyTable);
-        scrollPane.setOpaque(false);
-        scrollPane.setBackground(Theme.BACKGROUND_TRANSLUCENT);
-        scrollPane.getViewport().setOpaque(false);
+        scrollPane.setOpaque(true);
+        scrollPane.setBackground(Color.BLACK);
+        scrollPane.getViewport().setOpaque(true);
+        scrollPane.getViewport().setBackground(Color.BLACK);
         scrollPane.setBorder(null);
-        scrollPane.getViewport().setBackground(new Color(0, 0, 0, 0));
         scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
         scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         
@@ -161,8 +161,8 @@ public class HistoryPanel extends JPanel {
         historyTable = new JTable(tableModel);
         
         // 1. Styling Dasar Tabel
-        historyTable.setOpaque(false);
-        historyTable.setBackground(Theme.BACKGROUND_TRANSLUCENT);
+        historyTable.setOpaque(true);
+        historyTable.setBackground(Color.BLACK);
         historyTable.setForeground(Theme.TEXT_WHITE);
         historyTable.setFont(Theme.FONT_BODY.deriveFont(12f));
         historyTable.setRowHeight(46); 
@@ -177,14 +177,41 @@ public class HistoryPanel extends JPanel {
         // 2. Styling Header 
         JTableHeader header = historyTable.getTableHeader();
         header.setOpaque(true); 
-        header.setBackground(Theme.BACKGROUND_TRANSLUCENT); 
+        header.setBackground(Color.BLACK); 
         header.setForeground(Theme.TEXT_WHITE);
         header.setFont(Theme.FONT_BODYBOLD.deriveFont(14f));
         header.setPreferredSize(new Dimension(0, 40));
         
-        header.setDefaultRenderer(new TransparentHeaderRenderer());
+        header.setDefaultRenderer(new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+                JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                l.setOpaque(true);
+                l.setBackground(Color.BLACK);
+                l.setForeground(Theme.TEXT_WHITE);
+                l.setFont(Theme.FONT_BUTTON.deriveFont(Font.BOLD, 14f));
+                l.setHorizontalAlignment(column == 0 ? JLabel.LEFT : JLabel.CENTER);
+                if (column == 0) l.setBorder(new EmptyBorder(0, 10, 0, 0));
+                return l;
+            }
+        });
         
-        historyTable.setDefaultRenderer(Object.class, new TransparentCellRenderer());
+        historyTable.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+                JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                l.setOpaque(true);
+                l.setBackground(Color.BLACK);
+                l.setForeground(Theme.TEXT_WHITE);
+                if (column == 0) {
+                    l.setHorizontalAlignment(JLabel.LEFT);
+                } else {
+                    l.setHorizontalAlignment(JLabel.CENTER);
+                    l.setFont(Theme.FONT_BODY.deriveFont(13f)); 
+                }
+                return l;
+            }
+        });
         
         // Lebar Kolom
         historyTable.getColumnModel().getColumn(0).setPreferredWidth(180);
@@ -231,46 +258,6 @@ public class HistoryPanel extends JPanel {
                                       "</div></html>";
 
             tableModel.addRow(new Object[]{formattedSession, work, sb, lb});
-        }
-    }
-
-    // Renderer Header Transparan
-    class TransparentHeaderRenderer extends DefaultTableCellRenderer {
-        @Override
-        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-            JLabel l = new JLabel();
-            l.setText(value.toString());
-            l.setOpaque(true);
-            l.setBackground(Theme.BACKGROUND_TRANSLUCENT);
-            l.setForeground(Theme.TEXT_WHITE);
-            l.setFont(Theme.FONT_BUTTON.deriveFont(Font.BOLD, 14f));
-            
-            // Alignment
-            l.setHorizontalAlignment(column == 0 ? JLabel.LEFT : JLabel.CENTER);
-            if (column == 0) l.setBorder(new EmptyBorder(0, 10, 0, 0)); 
-            
-            return l;
-        }
-    }
-
-    // Renderer Cell Transparan
-    class TransparentCellRenderer extends DefaultTableCellRenderer {
-        @Override
-        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-            JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-            
-            l.setOpaque(true);
-            l.setForeground(Theme.TEXT_WHITE);
-            
-            if (column == 0) {
-                l.setHorizontalAlignment(JLabel.LEFT);
-            } else {
-                l.setHorizontalAlignment(JLabel.CENTER);
-                l.setFont(Theme.FONT_BODY.deriveFont(13f)); 
-            }
-            
-            l.setBackground(Theme.BACKGROUND_TRANSLUCENT);
-            return l;
         }
     }
 
