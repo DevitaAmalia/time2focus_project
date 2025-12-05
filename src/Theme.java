@@ -38,12 +38,7 @@ public class Theme {
     public static Font FONT_CAPTION;       
     public static Font FONT_BODYBOLD;
 
-    // --- 4. STYLES (SimpleAttributeSet) ---
-    public static final SimpleAttributeSet STYLE_DEFAULT = new SimpleAttributeSet();
-    public static final SimpleAttributeSet STYLE_WORK = new SimpleAttributeSet();
-    public static final SimpleAttributeSet STYLE_BREAK = new SimpleAttributeSet();
-
-    // --- 5. STATIC INITIALIZATION (Setup Font & Styles) ---
+    // --- 4. STATIC INITIALIZATION (Setup Font & Styles) ---
     static {
         try {
             GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
@@ -78,11 +73,6 @@ public class Theme {
                 FONT_BUTTON    = baseMedium.deriveFont(27f);
                 FONT_BODY      = baseMedium.deriveFont(14f);
             }
-
-            StyleConstants.setForeground(STYLE_DEFAULT, TEXT_WHITE);
-            StyleConstants.setFontFamily(STYLE_DEFAULT, FONT_NAME);
-            StyleConstants.setForeground(STYLE_WORK, TEXT_WHITE);
-            StyleConstants.setForeground(STYLE_BREAK, TEXT_WHITE);
 
         } catch (Exception e) {
             e.printStackTrace();
